@@ -1,17 +1,5 @@
-# Codex Instructions
+<!-- BEGIN:nextjs-agent-rules -->
+# This is NOT the Next.js you know
 
-Stack:
-- Next.js App Router
-- TypeScript
-- Tailwind
-- MongoDB Atlas
-- Mongoose
-- osu! OAuth only
-
-Rules:
-- Make small, reviewable changes.
-- Do not add Firebase, Prisma, Supabase, or NextAuth.
-- Do not commit secrets.
-- Use environment variables for osu! and MongoDB credentials.
-- Explain changed files after each task.
-- Prefer simple REST API routes under src/app/api.
+This version has breaking changes — APIs, conventions, and file structure may all differ from your training data. Read the relevant guide in `node_modules/next/dist/docs/` before writing any code. Heed deprecation notices.
+<!-- END:nextjs-agent-rules -->

@@ -1,157 +1,36 @@
-# osu! Session Tracker
+This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
 
-A web app for tracking osu! play sessions and saving them as a personal history/log that you can revisit over time.
+## Getting Started
 
-The app uses osu! authentication to identify users and pulls play data from the osu! API, allowing you to organize your plays into sessions and analyze your progress.
+First, run the development server:
 
----
-
-## Core Idea
-
-Log in with your osu! account, create sessions, import your recent plays, and store them as a structured log.
-
-Each session represents a snapshot of what you played during a specific time period.
-
----
-
-## Planned Features
-
-- osu! OAuth login
-- Fetch recent plays from the osu! API
-- Create and manage session sets
-- Import plays into sessions
-- View past sessions
-- Inspect individual plays
-- Basic stats per session:
-  - total plays
-  - average accuracy
-  - best score
-  - ranks achieved
-  - most played maps
-
----
-
-## Tech Stack
-
-- Next.js (App Router)
-- React
-- TypeScript
-- Tailwind CSS
-- MongoDB Atlas
-- Mongoose
-- osu! API v2
-- Vercel
-
----
-
-## Data Model
-```ts
-type User = {
-  osuUserId: string;
-  username: string;
-  avatarUrl?: string;
-  accessToken?: string;
-  refreshToken?: string;
-  tokenExpiresAt?: Date;
-};
-
-type Session = {
-  userId: string;
-  name: string;
-  createdAt: Date;
-  updatedAt: Date;
-};
-
-type Play = {
-  userId: string;
-  sessionId: string;
-  osuScoreId?: string;
-  beatmapId?: string;
-  title: string;
-  artist?: string;
-  difficulty?: string;
-  score?: number;
-  accuracy?: number;
-  rank?: string;
-  mods?: string[];
-  playedAt?: Date;
-};
+```bash
+npm run dev
+# or
+yarn dev
+# or
+pnpm dev
+# or
+bun dev
 ```
 
-## Project Structure
-src/
-  app/
-    api/
-      auth/
-        osu/
-          login/
-          callback/
-      sessions/
-      sessions/[id]/
-      sessions/[id]/plays/
-    dashboard/
-    sessions/
-    sessions/[id]/
+Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 
-  components/
-  lib/
-    mongodb.ts
-    osuAuth.ts
-    osuApi.ts
+You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
 
-  models/
-    User.ts
-    Session.ts
-    Play.ts
+This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
 
-  types/
+## Learn More
 
-## Environment Variables
-Create a .env.local file: 
-MONGODB_URI=
-OSU_CLIENT_ID=
-OSU_CLIENT_SECRET=
-OSU_REDIRECT_URI=http://localhost:3000/api/auth/osu/callback
-NEXT_PUBLIC_APP_URL=http://localhost:3000
-JWT_SECRET=
+To learn more about Next.js, take a look at the following resources:
 
-For production (Vercel):
-OSU_REDIRECT_URI=https://your-app.vercel.app/api/auth/osu/callback
-NEXT_PUBLIC_APP_URL=https://your-app.vercel.app
+- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
+- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
 
-## Development
-npm install
-npm run dev
+You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
 
-Open:
-http://localhost:3000
+## Deploy on Vercel
 
-Build:
-npm run build
+The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
 
-## Roadmap
-### Phase 1: Setup
-- Initialize Next.js project
-- Add Tailwind CSS
-- Connect MongoDB Atlas
-- Define Mongoose models
-### Phase 2: Authentication
-- Implement osu! OAuth
-- Store user data
-- Set up session handling (cookies/JWT)
-### Phase 3: Sessions
-- Create sessions
-- List sessions
-- View session details
-- Delete sessions
-### Phase 4: Plays
-- Fetch recent plays from osu! API
-- Import plays into sessions
-- View plays within a session
-- Delete plays
-### Phase 5: Stats
-- Session summaries
-- Basic analytics (avg accuracy, best scores, etc.)
-- Filtering and search
-- Charts (later)
-
+Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
