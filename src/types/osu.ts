@@ -16,7 +16,7 @@ export type OsuRecentScore = {
   accuracy: number;
   score: number;
   rank: string;
-  mods: string[];
+  mods: Array<string | { acronym?: string }>;
   created_at: string;
   beatmap?: {
     id: number;
