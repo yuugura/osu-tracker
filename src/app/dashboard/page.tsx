@@ -36,50 +36,21 @@ export default async function DashboardPage() {
       </div>
 
       <section className="grid gap-8 py-10 lg:grid-cols-[320px_1fr]">
-        <div className="space-y-5">
-          <form
-            action="/api/sessions/import-recent"
-            className="h-fit rounded-md border border-zinc-200 p-5"
-            method="post"
-          >
-            <h2 className="text-lg font-semibold text-zinc-950">
-              Import recent plays
-            </h2>
-            <p className="mt-2 text-sm leading-6 text-zinc-700">
-              Creates a new session and fills it with your recent osu! plays.
-            </p>
-            <button className="mt-5 w-full rounded-md bg-pink-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-pink-700">
-              Import now
-            </button>
-          </form>
-
-          <form
-            action="/api/sessions"
-            className="h-fit rounded-md border border-zinc-200 p-5"
-            method="post"
-          >
-            <h2 className="text-lg font-semibold text-zinc-950">
-              Empty session
-            </h2>
-            <label
-              className="mt-5 block text-sm font-medium text-zinc-800"
-              htmlFor="name"
-            >
-              Session name
-            </label>
-            <input
-              className="mt-2 w-full rounded-md border border-zinc-300 px-3 py-2 text-sm outline-none focus:border-pink-500 focus:ring-2 focus:ring-pink-100"
-              id="name"
-              name="name"
-              placeholder="Evening aim practice"
-              required
-              type="text"
-            />
-            <button className="mt-4 w-full rounded-md border border-zinc-300 px-4 py-2.5 text-sm font-semibold text-zinc-900 hover:bg-zinc-100">
-              Create empty
-            </button>
-          </form>
-        </div>
+        <form
+          action="/api/sessions/import-recent"
+          className="h-fit rounded-md border border-zinc-200 p-5"
+          method="post"
+        >
+          <h2 className="text-lg font-semibold text-zinc-950">
+            Import recent plays
+          </h2>
+          <p className="mt-2 text-sm leading-6 text-zinc-700">
+            Uses your current 24-hour session, or creates one if needed.
+          </p>
+          <button className="mt-5 w-full rounded-md bg-pink-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-pink-700">
+            Import now
+          </button>
+        </form>
 
         <div>
           <h2 className="text-lg font-semibold text-zinc-950">
@@ -112,7 +83,7 @@ export default async function DashboardPage() {
           ) : (
             <div className="mt-4 rounded-md border border-dashed border-zinc-300 p-6">
               <p className="text-sm leading-6 text-zinc-700">
-                No sessions yet. Create one to start grouping imported plays.
+                No sessions yet. Import recent plays to start tracking.
               </p>
             </div>
           )}

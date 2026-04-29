@@ -37,6 +37,9 @@ const playSchema = new Schema(
     score: {
       type: Number,
     },
+    passed: {
+      type: Boolean,
+    },
     accuracy: {
       type: Number,
       min: 0,
@@ -60,6 +63,7 @@ const playSchema = new Schema(
 );
 
 playSchema.index({ sessionId: 1, playedAt: -1 });
+playSchema.index({ userId: 1, sessionId: 1, osuScoreId: 1 }, { unique: true });
 
 export type Play = InferSchemaType<typeof playSchema>;
 

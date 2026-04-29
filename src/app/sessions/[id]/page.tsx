@@ -63,6 +63,22 @@ export default async function SessionPage({ params }: SessionPageProps) {
         <p className="mt-3 text-sm text-zinc-600">
           {playCount} imported plays
         </p>
+        {session.lastImportAt ? (
+          <div className="mt-4 grid gap-3 text-sm text-zinc-700 sm:grid-cols-3">
+            <Stat
+              label="Last import"
+              value={session.lastImportAt.toLocaleString()}
+            />
+            <Stat
+              label="Returned"
+              value={String(session.lastImportScoreCount ?? 0)}
+            />
+            <Stat
+              label="Failed"
+              value={String(session.lastImportFailedScoreCount ?? 0)}
+            />
+          </div>
+        ) : null}
       </header>
 
       <section className="py-10">
@@ -73,10 +89,17 @@ export default async function SessionPage({ params }: SessionPageProps) {
               <div className="px-4 py-4" key={play._id.toString()}>
                 <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
                   <div>
-                    <h3 className="font-medium text-zinc-950">
-                      {play.artist ? `${play.artist} - ` : ""}
-                      {play.title}
-                    </h3>
+                    <div className="flex flex-wrap items-center gap-2">
+                      <h3 className="font-medium text-zinc-950">
+                        {play.artist ? `${play.artist} - ` : ""}
+                        {play.title}
+                      </h3>
+                      {play.rank === "F" || play.passed === false ? (
+                        <span className="rounded-sm bg-red-100 px-2 py-0.5 text-xs font-semibold text-red-700">
+                          Failed
+                        </span>
+                      ) : null}
+                    </div>
                     <p className="mt-1 text-sm text-zinc-600">
                       {play.difficulty ?? "Unknown difficulty"}
                       {play.mods.length > 0 ? ` +${play.mods.join("")}` : ""}

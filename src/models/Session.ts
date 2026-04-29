@@ -13,6 +13,17 @@ const sessionSchema = new Schema(
       required: true,
       trim: true,
     },
+    lastImportAt: {
+      type: Date,
+    },
+    lastImportScoreCount: {
+      type: Number,
+      default: 0,
+    },
+    lastImportFailedScoreCount: {
+      type: Number,
+      default: 0,
+    },
   },
   {
     timestamps: true,

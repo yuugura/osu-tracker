@@ -42,9 +42,18 @@ export async function fetchOsuMe(accessToken: string) {
   return fetchOsuApi<OsuUserResponse>("/me", accessToken);
 }
 
-export async function fetchRecentOsuScores(accessToken: string, limit = 50) {
+export async function fetchRecentOsuScores(
+  accessToken: string,
+  osuUserId: string,
+  limit = 50,
+) {
+  const params = new URLSearchParams({
+    include_fails: "1",
+    limit: String(limit),
+  });
+
   return fetchOsuApi<OsuRecentScore[]>(
-    `/me/scores/recent?limit=${limit}`,
+    `/users/${osuUserId}/scores/recent?${params.toString()}`,
     accessToken,
   );
 }

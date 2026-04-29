@@ -12,12 +12,20 @@ export type OsuUserResponse = {
 };
 
 export type OsuRecentScore = {
-  id: number;
+  id?: number | null;
+  best_id?: number | null;
+  legacy_score_id?: number | null;
   accuracy: number;
-  score: number;
+  score?: number;
+  total_score?: number;
+  legacy_total_score?: number;
+  classic_total_score?: number;
   rank: string;
   mods: Array<string | { acronym?: string }>;
-  created_at: string;
+  passed?: boolean;
+  created_at?: string;
+  ended_at?: string;
+  beatmap_id?: number;
   beatmap?: {
     id: number;
     version: string;

@@ -2,7 +2,11 @@ import { NextRequest, NextResponse } from "next/server";
 import { getCurrentSession } from "@/lib/auth";
 import { connectMongoDB } from "@/lib/mongodb";
 import { fetchRecentOsuScores } from "@/lib/osuApi";
-import { getDefaultSessionName, mapRecentScoreToPlay } from "@/lib/playImport";
+import {
+  getDefaultSessionName,
+  getRecentSessionCutoff,
+  mapRecentScoreToPlay,
+} from "@/lib/playImport";
 import { PlayModel } from "@/models/Play";
 import { SessionModel } from "@/models/Session";
 import { UserModel } from "@/models/User";
@@ -29,23 +33,78 @@ export async function POST(request: NextRequest) {
     );
   }
 
-  const recentScores = await fetchRecentOsuScores(user.accessToken);
-  const session = await SessionModel.create({
-    userId: authSession.userId,
-    name: getDefaultSessionName(),
-  });
+  const recentScores = await fetchRecentOsuScores(
+    user.accessToken,
+    authSession.osuUserId,
+  );
+  const failedScoreCount = recentScores.filter(isFailedScore).length;
+  const now = new Date();
+  const session = await SessionModel.findOneAndUpdate(
+    {
+      userId: authSession.userId,
+      createdAt: { $gte: getRecentSessionCutoff(now) },
+    },
+    {
+      $setOnInsert: {
+        userId: authSession.userId,
+        name: getDefaultSessionName(now),
+      },
+    },
+    {
+      new: true,
+      setDefaultsOnInsert: true,
+      sort: { createdAt: -1 },
+      upsert: true,
+    },
+  );
 
   if (recentScores.length > 0) {
-    await PlayModel.insertMany(
-      recentScores.map((score) =>
-        mapRecentScoreToPlay({
-          score,
-          sessionId: session._id,
-          userId: authSession.userId,
-        }),
-      ),
+    const plays = recentScores.map((score) =>
+      mapRecentScoreToPlay({
+        score,
+        sessionId: session._id,
+        userId: authSession.userId,
+      }),
+    );
+
+    await PlayModel.bulkWrite(
+      plays.map((play) => ({
+        updateOne: {
+          filter: {
+            userId: authSession.userId,
+            sessionId: session._id,
+            osuScoreId: play.osuScoreId,
+          },
+          update: {
+            $setOnInsert: play,
+          },
+          upsert: true,
+        },
+      })),
     );
   }
+
+  const importedCount = await PlayModel.countDocuments({
+    userId: authSession.userId,
+    sessionId: session._id,
+    osuScoreId: {
+      $in: recentScores.map((score) => mapRecentScoreToPlay({
+        score,
+        sessionId: session._id,
+        userId: authSession.userId,
+      }).osuScoreId),
+    },
+  });
+  await SessionModel.updateOne(
+    { _id: session._id },
+    {
+      $set: {
+        lastImportAt: now,
+        lastImportScoreCount: recentScores.length,
+        lastImportFailedScoreCount: failedScoreCount,
+      },
+    },
+  );
 
   if (isFormRequest(request)) {
     return NextResponse.redirect(
@@ -57,10 +116,14 @@ export async function POST(request: NextRequest) {
   return NextResponse.json(
     {
       session,
-      importedCount: recentScores.length,
+      importedCount,
     },
     { status: 201 },
   );
+}
+
+function isFailedScore(score: { rank: string; passed?: boolean }) {
+  return score.rank === "F" || score.passed === false;
 }
 
 function isFormRequest(request: NextRequest) {
