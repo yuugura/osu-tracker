@@ -5,6 +5,7 @@ import {
   SessionPlaySearch,
   type SearchablePlay,
 } from "@/components/SessionPlaySearch";
+import { SessionAiSummary } from "@/components/SessionAiSummary";
 import { getCurrentSession } from "@/lib/auth";
 import { connectMongoDB } from "@/lib/mongodb";
 import {
@@ -166,6 +167,18 @@ export default async function SessionPage({ params }: SessionPageProps) {
           )} + ${stats.rankCounts.A}`}
         />
       </section>
+
+      <SessionAiSummary
+        initialSummary={{
+          generatedAt: session.aiSummary?.generatedAt
+            ? session.aiSummary.generatedAt.toISOString()
+            : null,
+          model: session.aiSummary?.model ?? null,
+          text: session.aiSummary?.text ?? null,
+        }}
+        playCount={playCount}
+        sessionId={id}
+      />
 
       <section className="border-b border-zinc-200 py-8">
         <h2 className="text-lg font-semibold text-zinc-950">Ranks</h2>

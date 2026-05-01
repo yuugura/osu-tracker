@@ -50,6 +50,19 @@ const sessionSchema = new Schema(
         type: Number,
       },
     },
+    aiSummary: {
+      text: {
+        type: String,
+        trim: true,
+      },
+      model: {
+        type: String,
+        trim: true,
+      },
+      generatedAt: {
+        type: Date,
+      },
+    },
   },
   {
     timestamps: true,
