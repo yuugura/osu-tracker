@@ -30,6 +30,8 @@
 - MongoDB models live in `src/models`.
 - Shared server helpers live in `src/lib`.
 - UI components live in `src/components`.
+- Authenticated Dashboard, Community, and Session pages share `src/components/AppShell.tsx` for navigation, page headers, and logout.
+- The UI currently defaults to dark mode with zinc surfaces and pink accents.
 - AI session summary generation lives in `src/lib/aiSessionSummary.ts` and runs automatically from `src/app/api/sessions/import-recent/route.ts` after imports.
 - Shared import logic lives in `src/lib/recentImport.ts`; manual and automatic imports should use it.
 - Vercel Cron calls `src/app/api/cron/import-recent/route.ts`; keep it protected by `CRON_SECRET`.

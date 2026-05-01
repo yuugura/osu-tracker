@@ -36,15 +36,15 @@ export function SessionPlaySearch({ plays }: { plays: SearchablePlay[] }) {
     <section className="py-10">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
         <div>
-          <h2 className="text-lg font-semibold text-zinc-950">Plays</h2>
-          <p className="mt-1 text-sm text-zinc-600">
+          <h2 className="text-lg font-semibold text-zinc-50">Plays</h2>
+          <p className="mt-1 text-sm text-zinc-400">
             Showing {filteredPlays.length} of {plays.length}
           </p>
         </div>
-        <label className="text-sm font-medium text-zinc-800">
+        <label className="text-sm font-medium text-zinc-300">
           Search
           <input
-            className="mt-2 block w-full rounded-md border border-zinc-300 px-3 py-2 text-sm outline-none focus:border-pink-500 focus:ring-2 focus:ring-pink-100 sm:w-80"
+            className="mt-2 block w-full rounded-md border border-zinc-700 bg-zinc-900 px-3 py-2 text-sm text-zinc-50 outline-none placeholder:text-zinc-500 focus:border-pink-400 focus:ring-2 focus:ring-pink-500/20 sm:w-80"
             onChange={(event) => setQuery(event.target.value)}
             placeholder="Song, mapper, tag, mod, rank..."
             type="search"
@@ -54,16 +54,16 @@ export function SessionPlaySearch({ plays }: { plays: SearchablePlay[] }) {
       </div>
 
       {filteredPlays.length > 0 ? (
-        <div className="mt-4 divide-y divide-zinc-200 rounded-md border border-zinc-200">
+        <div className="mt-4 divide-y divide-zinc-800 rounded-md border border-zinc-800 bg-zinc-900">
           {filteredPlays.map((play) => (
             <div className="px-4 py-4" key={play.id}>
               <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
                 <div className="min-w-0">
                   <div className="flex flex-wrap items-center gap-2">
-                    <h3 className="font-medium text-zinc-950">
+                    <h3 className="font-medium text-zinc-50">
                       {play.osuScoreUrl ? (
                         <a
-                          className="hover:text-pink-700"
+                          className="hover:text-pink-300"
                           href={play.osuScoreUrl}
                           rel="noreferrer"
                           target="_blank"
@@ -79,12 +79,12 @@ export function SessionPlaySearch({ plays }: { plays: SearchablePlay[] }) {
                       )}
                     </h3>
                     {play.rank === "F" || play.passed === false ? (
-                      <span className="rounded-sm bg-red-100 px-2 py-0.5 text-xs font-semibold text-red-700">
+                      <span className="rounded-sm bg-red-950 px-2 py-0.5 text-xs font-semibold text-red-300">
                         Failed
                       </span>
                     ) : null}
                   </div>
-                  <p className="mt-1 text-sm text-zinc-600">
+                  <p className="mt-1 text-sm text-zinc-400">
                     {play.difficulty ?? "Unknown difficulty"}
                     {(play.mods ?? []).length > 0
                       ? ` +${(play.mods ?? []).join("")}`
@@ -136,7 +136,7 @@ export function SessionPlaySearch({ plays }: { plays: SearchablePlay[] }) {
                 <div className="lg:text-right">
                   {play.osuScoreUrl ? (
                     <a
-                      className="inline-flex rounded-md border border-zinc-300 px-3 py-1.5 text-sm font-medium text-zinc-900 hover:bg-zinc-100"
+                      className="inline-flex rounded-md border border-zinc-700 px-3 py-1.5 text-sm font-medium text-zinc-100 hover:bg-zinc-800"
                       href={play.osuScoreUrl}
                       rel="noreferrer"
                       target="_blank"
@@ -144,7 +144,7 @@ export function SessionPlaySearch({ plays }: { plays: SearchablePlay[] }) {
                       View score
                     </a>
                   ) : (
-                    <span className="inline-flex rounded-md border border-zinc-200 px-3 py-1.5 text-sm font-medium text-zinc-400">
+                    <span className="inline-flex rounded-md border border-zinc-800 px-3 py-1.5 text-sm font-medium text-zinc-500">
                       No score page
                     </span>
                   )}
@@ -154,8 +154,8 @@ export function SessionPlaySearch({ plays }: { plays: SearchablePlay[] }) {
           ))}
         </div>
       ) : (
-        <div className="mt-4 rounded-md border border-dashed border-zinc-300 p-6">
-          <p className="text-sm leading-6 text-zinc-700">
+        <div className="mt-4 rounded-md border border-dashed border-zinc-700 p-6">
+          <p className="text-sm leading-6 text-zinc-400">
             No plays match that search.
           </p>
         </div>
@@ -170,7 +170,7 @@ function Stat({ label, value }: { label: string; value: string }) {
       <p className="text-xs font-medium uppercase tracking-wide text-zinc-500">
         {label}
       </p>
-      <p className="mt-1 text-sm font-semibold text-zinc-950">{value}</p>
+      <p className="mt-1 text-sm font-semibold text-zinc-50">{value}</p>
     </div>
   );
 }

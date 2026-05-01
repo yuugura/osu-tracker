@@ -59,6 +59,8 @@ osu! Session Tracker is a Next.js App Router app for logging in with osu!, impor
 
 ### Dashboard
 
+- Uses the shared authenticated app shell with global Dashboard/Community navigation and logout.
+- Uses the app-wide dark mode visual treatment.
 - Added session list.
 - Added delete session button.
 - Added last import status panel with returned score count, failed count, AI summary timestamp, and scheduler run status.
@@ -81,6 +83,8 @@ osu! Session Tracker is a Next.js App Router app for logging in with osu!, impor
 ### Community
 
 - Added `/community` as a separate navigation tab from the personal dashboard.
+- Uses the shared authenticated app shell with consistent page header styling.
+- Uses the app-wide dark mode visual treatment.
 - Added trending map leaderboards for the last 24 hours and last 7 days:
   - play count
   - unique player count
@@ -98,6 +102,8 @@ osu! Session Tracker is a Next.js App Router app for logging in with osu!, impor
 
 ### Session Detail
 
+- Uses the shared authenticated app shell, including global navigation and a back link to the dashboard.
+- Uses the app-wide dark mode visual treatment.
 - Added session stats:
   - play count
   - passed/failed
@@ -134,6 +140,8 @@ osu! Session Tracker is a Next.js App Router app for logging in with osu!, impor
 - AI generation is best-effort so osu! play imports are not blocked by Gemini failures or missing API keys.
 - Gemini is the current AI provider because it has a practical free tier for small development usage.
 - Community leaderboards are not opt-in right now; any user with imported plays can appear in app-user rankings.
+- Dashboard, Community, and Session detail pages share `src/components/AppShell.tsx` so authenticated routes feel like one app.
+- The app currently defaults to dark mode with zinc surfaces, subdued borders, and pink accents.
 
 ## Environment Variables
 
@@ -166,7 +174,6 @@ CRON_SECRET=
 
 ## Good Next Steps
 
-- Add a shared app shell/navigation for Dashboard, Community, and Session pages.
 - Polish production UI and mobile layout.
 - Add richer filters for plays and sessions.
 - Add chart options for cumulative vs per-session stats.

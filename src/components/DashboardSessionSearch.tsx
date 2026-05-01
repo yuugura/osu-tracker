@@ -44,17 +44,17 @@ export function DashboardSessionSearch({
     <div>
       <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
         <div>
-          <h2 className="text-lg font-semibold text-zinc-950">
+          <h2 className="text-lg font-semibold text-zinc-50">
             Recent sessions
           </h2>
-          <p className="mt-1 text-sm text-zinc-600">
+          <p className="mt-1 text-sm text-zinc-400">
             Showing {filteredSessions.length} of {sessions.length}
           </p>
         </div>
-        <label className="text-sm font-medium text-zinc-800">
+        <label className="text-sm font-medium text-zinc-300">
           Search sessions
           <input
-            className="mt-2 block w-full rounded-md border border-zinc-300 px-3 py-2 text-sm outline-none focus:border-pink-500 focus:ring-2 focus:ring-pink-100 sm:w-80"
+            className="mt-2 block w-full rounded-md border border-zinc-700 bg-zinc-900 px-3 py-2 text-sm text-zinc-50 outline-none placeholder:text-zinc-500 focus:border-pink-400 focus:ring-2 focus:ring-pink-500/20 sm:w-80"
             onChange={(event) => setQuery(event.target.value)}
             placeholder="Song, mapper, tag, mod, rank..."
             type="search"
@@ -64,7 +64,7 @@ export function DashboardSessionSearch({
       </div>
 
       {filteredSessions.length > 0 ? (
-        <div className="mt-4 divide-y divide-zinc-200 rounded-md border border-zinc-200">
+        <div className="mt-4 divide-y divide-zinc-800 rounded-md border border-zinc-800 bg-zinc-900">
           {filteredSessions.map((session) => {
             const matches = getMatchingPlays(session, normalizedQuery);
 
@@ -72,11 +72,11 @@ export function DashboardSessionSearch({
               <div className="px-4 py-4" key={session.id}>
                 <div className="flex items-center justify-between gap-4">
                   <Link
-                    className="min-w-0 flex-1 hover:text-pink-700"
+                    className="min-w-0 flex-1 hover:text-pink-300"
                     href={`/sessions/${session.id}`}
                   >
-                    <h3 className="font-medium text-zinc-950">{session.name}</h3>
-                    <p className="mt-1 text-sm text-zinc-600">
+                    <h3 className="font-medium text-zinc-50">{session.name}</h3>
+                    <p className="mt-1 text-sm text-zinc-400">
                       Created {session.createdAtLabel} · {session.playCount} plays
                     </p>
                     {normalizedQuery && matches.length > 0 ? (
@@ -91,13 +91,13 @@ export function DashboardSessionSearch({
                   </Link>
                   <div className="flex items-center gap-3">
                     <Link
-                      className="text-sm font-medium text-pink-700"
+                      className="text-sm font-medium text-pink-300"
                       href={`/sessions/${session.id}`}
                     >
                       Open
                     </Link>
                     <form action={`/api/sessions/${session.id}`} method="post">
-                      <button className="rounded-md border border-red-200 px-3 py-1.5 text-sm font-medium text-red-700 hover:bg-red-50">
+                      <button className="rounded-md border border-red-900/70 px-3 py-1.5 text-sm font-medium text-red-300 hover:bg-red-950/60">
                         Delete
                       </button>
                     </form>
@@ -108,8 +108,8 @@ export function DashboardSessionSearch({
           })}
         </div>
       ) : (
-        <div className="mt-4 rounded-md border border-dashed border-zinc-300 p-6">
-          <p className="text-sm leading-6 text-zinc-700">
+        <div className="mt-4 rounded-md border border-dashed border-zinc-700 p-6">
+          <p className="text-sm leading-6 text-zinc-400">
             No sessions match that search.
           </p>
         </div>

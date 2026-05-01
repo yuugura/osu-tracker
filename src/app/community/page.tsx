@@ -1,5 +1,5 @@
-import Link from "next/link";
 import { redirect } from "next/navigation";
+import { AppShell } from "@/components/AppShell";
 import { getCurrentSession } from "@/lib/auth";
 import { connectMongoDB } from "@/lib/mongodb";
 import { PlayModel } from "@/models/Play";
@@ -68,40 +68,18 @@ export default async function CommunityPage() {
   ]);
 
   return (
-    <main className="mx-auto flex min-h-screen w-full max-w-5xl flex-col px-6 py-12">
-      <div className="flex items-center justify-between gap-4 border-b border-zinc-200 pb-6">
+    <AppShell
+      activeSection="community"
+      description="Rankings are based on plays imported by users of this app, not global osu! data."
+      eyebrow="Community"
+      title="App user leaderboards"
+    >
+      <section className="border-b border-zinc-800 py-10">
         <div>
-          <p className="text-sm font-semibold uppercase tracking-wide text-pink-600">
-            Community
-          </p>
-          <h1 className="mt-2 text-3xl font-bold text-zinc-950">
-            App user leaderboards
-          </h1>
-          <p className="mt-3 max-w-2xl text-sm leading-6 text-zinc-600">
-            Rankings are based on plays imported by users of this app.
-          </p>
-        </div>
-        <div className="flex items-center gap-3">
-          <Link
-            className="text-sm font-medium text-pink-700"
-            href="/dashboard"
-          >
-            Dashboard
-          </Link>
-          <form action="/api/auth/logout" method="post">
-            <button className="rounded-md border border-zinc-300 px-3 py-2 text-sm font-medium text-zinc-800 hover:bg-zinc-100">
-              Log out
-            </button>
-          </form>
-        </div>
-      </div>
-
-      <section className="border-b border-zinc-200 py-10">
-        <div>
-          <h2 className="text-lg font-semibold text-zinc-950">
+          <h2 className="text-lg font-semibold text-zinc-50">
             Trending maps
           </h2>
-          <p className="mt-1 text-sm text-zinc-600">
+          <p className="mt-1 text-sm text-zinc-400">
             Beatmaps showing up most often in imported app-user plays.
           </p>
         </div>
@@ -120,7 +98,7 @@ export default async function CommunityPage() {
           <PpLeaderboard title="Highest PP plays - all imported" plays={ppAll} />
         </div>
       </section>
-    </main>
+    </AppShell>
   );
 }
 
@@ -132,21 +110,21 @@ function TrendingMaps({
   title: string;
 }) {
   return (
-    <div className="rounded-md border border-zinc-200">
-      <div className="border-b border-zinc-200 px-4 py-3">
-        <h3 className="text-sm font-semibold text-zinc-950">{title}</h3>
+    <div className="rounded-md border border-zinc-800 bg-zinc-900">
+      <div className="border-b border-zinc-800 px-4 py-3">
+        <h3 className="text-sm font-semibold text-zinc-50">{title}</h3>
       </div>
       {maps.length > 0 ? (
-        <div className="divide-y divide-zinc-200">
+        <div className="divide-y divide-zinc-800">
           {maps.map((map, index) => (
             <div className="px-4 py-3" key={`${map.beatmapId}-${index}`}>
               <div className="flex items-start justify-between gap-4">
                 <div className="min-w-0">
-                  <p className="truncate text-sm font-semibold text-zinc-950">
+                  <p className="truncate text-sm font-semibold text-zinc-50">
                     {index + 1}.{" "}
                     {map.beatmapId ? (
                       <a
-                        className="hover:text-pink-700"
+                        className="hover:text-pink-300"
                         href={`https://osu.ppy.sh/beatmaps/${map.beatmapId}`}
                         rel="noreferrer"
                         target="_blank"
@@ -157,7 +135,7 @@ function TrendingMaps({
                       formatMapName(map)
                     )}
                   </p>
-                  <p className="mt-1 text-xs text-zinc-600">
+                  <p className="mt-1 text-xs text-zinc-400">
                     {[
                       `${map.playerCount} players`,
                       `${map.failedCount} failed`,
@@ -170,7 +148,7 @@ function TrendingMaps({
                   </p>
                 </div>
                 <div className="shrink-0 text-right">
-                  <p className="text-lg font-semibold text-zinc-950">
+                  <p className="text-lg font-semibold text-zinc-50">
                     {map.playCount}
                   </p>
                   <p className="mt-1 text-xs text-zinc-500">
@@ -196,22 +174,22 @@ function VolumeLeaderboard({
   users: VolumeLeader[];
 }) {
   return (
-    <div className="rounded-md border border-zinc-200">
-      <div className="border-b border-zinc-200 px-4 py-3">
-        <h2 className="text-sm font-semibold text-zinc-950">{title}</h2>
+    <div className="rounded-md border border-zinc-800 bg-zinc-900">
+      <div className="border-b border-zinc-800 px-4 py-3">
+        <h2 className="text-sm font-semibold text-zinc-50">{title}</h2>
       </div>
       {users.length > 0 ? (
-        <div className="divide-y divide-zinc-200">
+        <div className="divide-y divide-zinc-800">
           {users.map((user, index) => (
             <div
               className="flex items-center justify-between gap-4 px-4 py-3"
               key={user.userId}
             >
               <div className="min-w-0">
-                <p className="text-sm font-semibold text-zinc-950">
+                <p className="text-sm font-semibold text-zinc-50">
                   {index + 1}.{" "}
                   <a
-                    className="hover:text-pink-700"
+                    className="hover:text-pink-300"
                     href={`https://osu.ppy.sh/users/${user.osuUserId}`}
                     rel="noreferrer"
                     target="_blank"
@@ -219,11 +197,11 @@ function VolumeLeaderboard({
                     {user.username}
                   </a>
                 </p>
-                <p className="mt-1 text-xs text-zinc-600">
+                <p className="mt-1 text-xs text-zinc-400">
                   {user.passedCount} passed / {user.failedCount} failed
                 </p>
               </div>
-              <p className="shrink-0 text-lg font-semibold text-zinc-950">
+              <p className="shrink-0 text-lg font-semibold text-zinc-50">
                 {user.playCount}
               </p>
             </div>
@@ -244,20 +222,20 @@ function PpLeaderboard({
   title: string;
 }) {
   return (
-    <div className="rounded-md border border-zinc-200">
-      <div className="border-b border-zinc-200 px-4 py-3">
-        <h2 className="text-sm font-semibold text-zinc-950">{title}</h2>
+    <div className="rounded-md border border-zinc-800 bg-zinc-900">
+      <div className="border-b border-zinc-800 px-4 py-3">
+        <h2 className="text-sm font-semibold text-zinc-50">{title}</h2>
       </div>
       {plays.length > 0 ? (
-        <div className="divide-y divide-zinc-200">
+        <div className="divide-y divide-zinc-800">
           {plays.map((play, index) => (
             <div className="px-4 py-3" key={`${play.userId}-${index}`}>
               <div className="flex items-start justify-between gap-4">
                 <div className="min-w-0">
-                  <p className="text-sm font-semibold text-zinc-950">
+                  <p className="text-sm font-semibold text-zinc-50">
                     {index + 1}.{" "}
                     <a
-                      className="hover:text-pink-700"
+                      className="hover:text-pink-300"
                       href={`https://osu.ppy.sh/users/${play.osuUserId}`}
                       rel="noreferrer"
                       target="_blank"
@@ -265,10 +243,10 @@ function PpLeaderboard({
                       {play.username}
                     </a>
                   </p>
-                  <p className="mt-1 truncate text-sm font-medium text-zinc-800">
+                  <p className="mt-1 truncate text-sm font-medium text-zinc-200">
                     {play.osuScoreUrl ? (
                       <a
-                        className="hover:text-pink-700"
+                        className="hover:text-pink-300"
                         href={play.osuScoreUrl}
                         rel="noreferrer"
                         target="_blank"
@@ -279,7 +257,7 @@ function PpLeaderboard({
                       formatPlayName(play)
                     )}
                   </p>
-                  <p className="mt-1 text-xs text-zinc-600">
+                  <p className="mt-1 text-xs text-zinc-400">
                     {[
                       play.difficulty,
                       play.mods.length > 0 ? `+${play.mods.join("")}` : null,
@@ -293,7 +271,7 @@ function PpLeaderboard({
                       .join(" · ")}
                   </p>
                 </div>
-                <p className="shrink-0 text-lg font-semibold text-zinc-950">
+                <p className="shrink-0 text-lg font-semibold text-zinc-50">
                   {play.pp.toFixed(2)}pp
                 </p>
               </div>
@@ -310,7 +288,7 @@ function PpLeaderboard({
 function EmptyLeaderboard() {
   return (
     <div className="px-4 py-5">
-      <p className="text-sm leading-6 text-zinc-700">
+      <p className="text-sm leading-6 text-zinc-400">
         No imported plays for this leaderboard yet.
       </p>
     </div>

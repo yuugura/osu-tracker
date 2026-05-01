@@ -1,6 +1,6 @@
-import Link from "next/link";
 import { Types } from "mongoose";
 import { notFound, redirect } from "next/navigation";
+import { AppShell } from "@/components/AppShell";
 import {
   SessionPlaySearch,
   type SearchablePlay,
@@ -85,23 +85,15 @@ export default async function SessionPage({ params }: SessionPageProps) {
     (session.profileGradeCounts?.s ?? 0);
 
   return (
-    <main className="mx-auto flex min-h-screen w-full max-w-5xl flex-col px-6 py-12">
-      <Link className="text-sm font-medium text-pink-700" href="/dashboard">
-        Back to dashboard
-      </Link>
-
-      <header className="mt-8 border-b border-zinc-200 pb-6">
-        <p className="text-sm font-semibold uppercase tracking-wide text-pink-600">
-          Session
-        </p>
-        <h1 className="mt-2 text-3xl font-bold text-zinc-950">
-          {session.name}
-        </h1>
-        <p className="mt-3 text-sm text-zinc-600">
-          {playCount} imported plays
-        </p>
-        {session.lastImportAt ? (
-          <div className="mt-4 grid gap-3 text-sm text-zinc-700 sm:grid-cols-3">
+    <AppShell
+      activeSection="session"
+      backHref="/dashboard"
+      backLabel="Back to dashboard"
+      description={`${playCount} imported plays`}
+      eyebrow="Session"
+      headerMeta={
+        session.lastImportAt ? (
+          <div className="mt-4 grid gap-3 text-sm text-zinc-300 sm:grid-cols-3">
             <Stat
               label="Last import"
               value={session.lastImportAt.toLocaleString()}
@@ -115,10 +107,11 @@ export default async function SessionPage({ params }: SessionPageProps) {
               value={String(session.lastImportFailedScoreCount ?? 0)}
             />
           </div>
-        ) : null}
-      </header>
-
-      <section className="grid gap-3 border-b border-zinc-200 py-8 sm:grid-cols-2 lg:grid-cols-4">
+        ) : null
+      }
+      title={session.name}
+    >
+      <section className="grid gap-3 border-b border-zinc-800 py-8 sm:grid-cols-2 lg:grid-cols-4">
         <SummaryStat
           label="Play count"
           value={formatTotalWithSession(session.profilePlayCount, stats.playCount)}
@@ -179,8 +172,8 @@ export default async function SessionPage({ params }: SessionPageProps) {
         playCount={playCount}
       />
 
-      <section className="border-b border-zinc-200 py-8">
-        <h2 className="text-lg font-semibold text-zinc-950">Ranks</h2>
+      <section className="border-b border-zinc-800 py-8">
+        <h2 className="text-lg font-semibold text-zinc-50">Ranks</h2>
         <div className="mt-4 grid grid-cols-3 gap-3 sm:grid-cols-5 lg:grid-cols-9">
           {Object.entries(stats.rankCounts).map(([rank, count]) => (
             <SummaryStat
@@ -196,25 +189,25 @@ export default async function SessionPage({ params }: SessionPageProps) {
         <SessionPlaySearch plays={searchablePlays} />
       ) : (
         <section className="py-10">
-          <h2 className="text-lg font-semibold text-zinc-950">Plays</h2>
-          <div className="mt-4 rounded-md border border-dashed border-zinc-300 p-6">
-            <p className="text-sm leading-6 text-zinc-700">
+          <h2 className="text-lg font-semibold text-zinc-50">Plays</h2>
+          <div className="mt-4 rounded-md border border-dashed border-zinc-700 p-6">
+            <p className="text-sm leading-6 text-zinc-400">
               No plays have been imported into this session yet.
             </p>
           </div>
         </section>
       )}
-    </main>
+    </AppShell>
   );
 }
 
 function SummaryStat({ label, value }: { label: string; value: string }) {
   return (
-    <div className="rounded-md border border-zinc-200 p-4">
+    <div className="rounded-md border border-zinc-800 bg-zinc-900 p-4">
       <p className="text-xs font-medium uppercase tracking-wide text-zinc-500">
         {label}
       </p>
-      <p className="mt-2 text-xl font-semibold text-zinc-950">{value}</p>
+      <p className="mt-2 text-xl font-semibold text-zinc-50">{value}</p>
     </div>
   );
 }
@@ -225,7 +218,7 @@ function Stat({ label, value }: { label: string; value: string }) {
       <p className="text-xs font-medium uppercase tracking-wide text-zinc-500">
         {label}
       </p>
-      <p className="mt-1 text-sm font-semibold text-zinc-950">{value}</p>
+      <p className="mt-1 text-sm font-semibold text-zinc-50">{value}</p>
     </div>
   );
 }

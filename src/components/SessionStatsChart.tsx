@@ -84,18 +84,18 @@ export function SessionStatsChart({ data }: { data: SessionChartPoint[] }) {
   const chart = useMemo(() => buildChart(data, metric), [data, metric]);
 
   return (
-    <section className="border-b border-zinc-200 py-10">
+    <section className="border-b border-zinc-800 py-10">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
         <div>
-          <h2 className="text-lg font-semibold text-zinc-950">Trends</h2>
-          <p className="mt-1 text-sm text-zinc-600">
+          <h2 className="text-lg font-semibold text-zinc-50">Trends</h2>
+          <p className="mt-1 text-sm text-zinc-400">
             {data.length} sessions tracked
           </p>
         </div>
-        <label className="text-sm font-medium text-zinc-800">
+        <label className="text-sm font-medium text-zinc-300">
           Stat
           <select
-            className="mt-2 block rounded-md border border-zinc-300 bg-white px-3 py-2 text-sm text-zinc-950 outline-none focus:border-pink-500 focus:ring-2 focus:ring-pink-100"
+            className="mt-2 block rounded-md border border-zinc-700 bg-zinc-900 px-3 py-2 text-sm text-zinc-50 outline-none focus:border-pink-400 focus:ring-2 focus:ring-pink-500/20"
             onChange={(event) => setMetricKey(event.target.value as Metric["key"])}
             value={metricKey}
           >
@@ -109,7 +109,7 @@ export function SessionStatsChart({ data }: { data: SessionChartPoint[] }) {
       </div>
 
       {data.length > 0 ? (
-        <div className="mt-5 overflow-x-auto rounded-md border border-zinc-200 p-4">
+        <div className="mt-5 overflow-x-auto rounded-md border border-zinc-800 bg-zinc-900 p-4">
           <svg
             aria-label={`${metric.label} by session`}
             className="min-w-[640px]"
@@ -117,24 +117,24 @@ export function SessionStatsChart({ data }: { data: SessionChartPoint[] }) {
             viewBox={`0 0 ${CHART_WIDTH} ${CHART_HEIGHT}`}
           >
             <line
-              stroke="#d4d4d8"
+              stroke="#3f3f46"
               x1={PADDING.left}
               x2={PADDING.left}
               y1={PADDING.top}
               y2={CHART_HEIGHT - PADDING.bottom}
             />
             <line
-              stroke="#d4d4d8"
+              stroke="#3f3f46"
               x1={PADDING.left}
               x2={CHART_WIDTH - PADDING.right}
               y1={CHART_HEIGHT - PADDING.bottom}
               y2={CHART_HEIGHT - PADDING.bottom}
             />
-            <text fill="#71717a" fontSize="12" x="0" y={PADDING.top + 4}>
+            <text fill="#a1a1aa" fontSize="12" x="0" y={PADDING.top + 4}>
               {metric.format(chart.max)}
             </text>
             <text
-              fill="#71717a"
+              fill="#a1a1aa"
               fontSize="12"
               x="0"
               y={CHART_HEIGHT - PADDING.bottom + 4}
@@ -145,7 +145,7 @@ export function SessionStatsChart({ data }: { data: SessionChartPoint[] }) {
               <polyline
                 fill="none"
                 points={chart.path}
-                stroke="#db2777"
+                stroke="#ec4899"
                 strokeLinecap="round"
                 strokeLinejoin="round"
                 strokeWidth="3"
@@ -156,7 +156,7 @@ export function SessionStatsChart({ data }: { data: SessionChartPoint[] }) {
                 aria-label={`${point.name}: ${metric.format(point.value)}`}
                 key={point.id}
               >
-                <circle cx={point.x} cy={point.y} fill="#db2777" r="4" />
+                <circle cx={point.x} cy={point.y} fill="#ec4899" r="4" />
               </g>
             ))}
             {chart.points.map((point, index) => {
@@ -166,7 +166,7 @@ export function SessionStatsChart({ data }: { data: SessionChartPoint[] }) {
 
               return (
                 <text
-                  fill="#71717a"
+                  fill="#a1a1aa"
                   fontSize="12"
                   key={`${point.id}-label`}
                   textAnchor={index === 0 ? "start" : "end"}
@@ -180,8 +180,8 @@ export function SessionStatsChart({ data }: { data: SessionChartPoint[] }) {
           </svg>
         </div>
       ) : (
-        <div className="mt-5 rounded-md border border-dashed border-zinc-300 p-6">
-          <p className="text-sm text-zinc-700">
+        <div className="mt-5 rounded-md border border-dashed border-zinc-700 p-6">
+          <p className="text-sm text-zinc-400">
             Import recent plays to start building session trends.
           </p>
         </div>

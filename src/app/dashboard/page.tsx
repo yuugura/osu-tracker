@@ -1,5 +1,5 @@
-import Link from "next/link";
 import { redirect } from "next/navigation";
+import { AppShell } from "@/components/AppShell";
 import { AutoImportRecentPlays } from "@/components/AutoImportRecentPlays";
 import {
   DashboardSessionSearch,
@@ -127,31 +127,13 @@ export default async function DashboardPage() {
   );
 
   return (
-    <main className="mx-auto flex min-h-screen w-full max-w-5xl flex-col px-6 py-12">
+    <AppShell
+      activeSection="dashboard"
+      description="Review your imported sessions, recent highlights, trends, and retry candidates."
+      eyebrow="Dashboard"
+      title="Your osu! sessions"
+    >
       <AutoImportRecentPlays />
-      <div className="flex items-center justify-between gap-4 border-b border-zinc-200 pb-6">
-        <div>
-          <p className="text-sm font-semibold uppercase tracking-wide text-pink-600">
-            Dashboard
-          </p>
-          <h1 className="mt-2 text-3xl font-bold text-zinc-950">
-            Your osu! sessions
-          </h1>
-        </div>
-        <div className="flex items-center gap-3">
-          <Link
-            className="text-sm font-medium text-pink-700"
-            href="/community"
-          >
-            Community
-          </Link>
-          <form action="/api/auth/logout" method="post">
-            <button className="rounded-md border border-zinc-300 px-3 py-2 text-sm font-medium text-zinc-800 hover:bg-zinc-100">
-              Log out
-            </button>
-          </form>
-        </div>
-      </div>
 
       <SessionStatsChart data={chartData} />
       <DashboardHighlights highlights={highlights} />
@@ -164,16 +146,16 @@ export default async function DashboardPage() {
           />
           <form
             action="/api/sessions/import-recent"
-            className="h-fit rounded-md border border-zinc-200 p-5"
+            className="h-fit rounded-md border border-zinc-800 bg-zinc-900 p-5"
             method="post"
           >
-            <h2 className="text-lg font-semibold text-zinc-950">
+            <h2 className="text-lg font-semibold text-zinc-50">
               Import recent plays
             </h2>
-            <p className="mt-2 text-sm leading-6 text-zinc-700">
+            <p className="mt-2 text-sm leading-6 text-zinc-400">
               Uses your current 24-hour session, or creates one if needed.
             </p>
-            <button className="mt-5 w-full rounded-md bg-pink-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-pink-700">
+            <button className="mt-5 w-full rounded-md bg-pink-500 px-4 py-2.5 text-sm font-semibold text-white hover:bg-pink-400">
               Import now
             </button>
           </form>
@@ -183,15 +165,15 @@ export default async function DashboardPage() {
           {sessions.length > 0 ? (
             <DashboardSessionSearch sessions={searchableSessions} />
           ) : (
-            <div className="mt-4 rounded-md border border-dashed border-zinc-300 p-6">
-              <p className="text-sm leading-6 text-zinc-700">
+            <div className="mt-4 rounded-md border border-dashed border-zinc-700 p-6">
+              <p className="text-sm leading-6 text-zinc-400">
                 No sessions yet. Import recent plays to start tracking.
               </p>
             </div>
           )}
         </div>
       </section>
-    </main>
+    </AppShell>
   );
 }
 
@@ -203,11 +185,11 @@ function ImportStatusPanel({
   session: ImportStatusSession | null | undefined;
 }) {
   return (
-    <section className="rounded-md border border-zinc-200 p-5">
-      <h2 className="text-lg font-semibold text-zinc-950">Import status</h2>
+    <section className="rounded-md border border-zinc-800 bg-zinc-900 p-5">
+      <h2 className="text-lg font-semibold text-zinc-50">Import status</h2>
       {session?.lastImportAt ? (
         <>
-          <p className="mt-2 text-sm leading-6 text-zinc-700">
+          <p className="mt-2 text-sm leading-6 text-zinc-400">
             Last imported {session.lastImportAt.toLocaleString()}.
           </p>
           <div className="mt-4 grid grid-cols-2 gap-3">
@@ -228,16 +210,16 @@ function ImportStatusPanel({
           </p>
         </>
       ) : (
-        <p className="mt-2 text-sm leading-6 text-zinc-700">
+        <p className="mt-2 text-sm leading-6 text-zinc-400">
           No imports have completed yet.
         </p>
       )}
-      <div className="mt-5 border-t border-zinc-200 pt-4">
+      <div className="mt-5 border-t border-zinc-800 pt-4">
         <p className="text-xs font-medium uppercase tracking-wide text-zinc-500">
           Scheduler
         </p>
         {schedulerRun ? (
-          <p className="mt-2 text-sm leading-6 text-zinc-700">
+          <p className="mt-2 text-sm leading-6 text-zinc-400">
             Last run {schedulerRun.status} at{" "}
             {schedulerRun.finishedAt?.toLocaleString() ??
               schedulerRun.startedAt.toLocaleString()}
@@ -245,7 +227,7 @@ function ImportStatusPanel({
             {schedulerRun.failureCount ?? 0} failed.
           </p>
         ) : (
-          <p className="mt-2 text-sm leading-6 text-zinc-700">
+          <p className="mt-2 text-sm leading-6 text-zinc-400">
             No scheduler runs recorded yet.
           </p>
         )}
@@ -273,11 +255,11 @@ type ImportStatusRun = {
 
 function SmallStat({ label, value }: { label: string; value: string }) {
   return (
-    <div className="rounded-md border border-zinc-200 p-3">
+    <div className="rounded-md border border-zinc-800 bg-zinc-950/40 p-3">
       <p className="text-xs font-medium uppercase tracking-wide text-zinc-500">
         {label}
       </p>
-      <p className="mt-1 text-lg font-semibold text-zinc-950">{value}</p>
+      <p className="mt-1 text-lg font-semibold text-zinc-50">{value}</p>
     </div>
   );
 }

@@ -17,12 +17,15 @@ A Next.js app for tracking osu! play sessions. Log in with osu!, import recent p
   - rank breakdown
   - searchable play list
 - Dashboard with:
+  - shared app shell navigation with Community and logout controls
   - last import status panel with returned score count, failed count, AI summary timestamp, and scheduler run status
   - personal highlights for play count, top PP plays, best accuracy plays, and maps to retry across 24h, 7d, and all imported plays
   - session search across contained plays
   - selectable trend line chart for play count, playtime, score, PP, accuracy, passed, and failed counts
   - delete session action
 - Community page with trending maps and app-user leaderboards for play volume and top imported PP plays
+- Dashboard, Community, and Session detail pages share one authenticated app shell/navigation
+- Dark mode UI across the landing page and authenticated app pages
 
 ## Tech Stack
 
@@ -46,6 +49,7 @@ src/
     dashboard/
     sessions/[id]/
   components/
+    AppShell.tsx
   lib/
   models/
   types/
@@ -184,6 +188,8 @@ NEXT_PUBLIC_APP_URL=https://your-app.vercel.app
 - Vercel Cron handles production automatic importing through `/api/cron/import-recent`.
 - The protected automatic import endpoint refreshes osu! tokens before importing when needed.
 - Import runs are recorded in MongoDB for manual, dashboard-auto, and scheduler imports.
+- Authenticated app pages use `src/components/AppShell.tsx` for shared navigation, page headers, and logout.
+- The UI currently defaults to dark mode with zinc surfaces and pink accents.
 
 ## Roadmap
 

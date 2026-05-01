@@ -53,23 +53,23 @@ export function DashboardHighlights({
   const activeHighlights = highlights[timeframeKey];
 
   return (
-    <section className="border-b border-zinc-200 py-10">
+    <section className="border-b border-zinc-800 py-10">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
         <div>
-          <h2 className="text-lg font-semibold text-zinc-950">
+          <h2 className="text-lg font-semibold text-zinc-50">
             Recent highlights
           </h2>
-          <p className="mt-1 text-sm text-zinc-600">
+          <p className="mt-1 text-sm text-zinc-400">
             Personal leaderboards from imported plays.
           </p>
         </div>
-        <div className="inline-flex w-fit rounded-md border border-zinc-300 p-1">
+        <div className="inline-flex w-fit rounded-md border border-zinc-800 bg-zinc-900 p-1">
           {TIMEFRAMES.map((timeframe) => (
             <button
               className={`rounded px-3 py-1.5 text-sm font-medium ${
                 timeframe.key === timeframeKey
-                  ? "bg-zinc-950 text-white"
-                  : "text-zinc-700 hover:bg-zinc-100"
+                  ? "bg-pink-500 text-white"
+                  : "text-zinc-400 hover:bg-zinc-800 hover:text-zinc-50"
               }`}
               key={timeframe.key}
               onClick={() => setTimeframeKey(timeframe.key)}
@@ -113,11 +113,11 @@ export function DashboardHighlights({
 
 function HighlightStat({ label, value }: { label: string; value: string }) {
   return (
-    <div className="rounded-md border border-zinc-200 p-4">
+    <div className="rounded-md border border-zinc-800 bg-zinc-900 p-4">
       <p className="text-xs font-medium uppercase tracking-wide text-zinc-500">
         {label}
       </p>
-      <p className="mt-2 text-2xl font-semibold text-zinc-950">{value}</p>
+      <p className="mt-2 text-2xl font-semibold text-zinc-50">{value}</p>
     </div>
   );
 }
@@ -132,21 +132,21 @@ function HighlightList({
   title: string;
 }) {
   return (
-    <div className="rounded-md border border-zinc-200">
-      <div className="border-b border-zinc-200 px-4 py-3">
-        <h3 className="text-sm font-semibold text-zinc-950">{title}</h3>
+    <div className="rounded-md border border-zinc-800 bg-zinc-900">
+      <div className="border-b border-zinc-800 px-4 py-3">
+        <h3 className="text-sm font-semibold text-zinc-50">{title}</h3>
       </div>
 
       {plays.length > 0 ? (
-        <div className="divide-y divide-zinc-200">
+        <div className="divide-y divide-zinc-800">
           {plays.map((play, index) => (
             <div className="px-4 py-3" key={`${play.id}-${index}`}>
               <div className="flex items-start justify-between gap-4">
                 <div className="min-w-0">
-                  <p className="truncate text-sm font-medium text-zinc-950">
+                  <p className="truncate text-sm font-medium text-zinc-50">
                     {play.osuScoreUrl ? (
                       <a
-                        className="hover:text-pink-700"
+                        className="hover:text-pink-300"
                         href={play.osuScoreUrl}
                         rel="noreferrer"
                         target="_blank"
@@ -157,7 +157,7 @@ function HighlightList({
                       formatPlayName(play)
                     )}
                   </p>
-                  <p className="mt-1 text-xs text-zinc-600">
+                  <p className="mt-1 text-xs text-zinc-400">
                     {[
                       play.difficulty,
                       play.mods.length > 0 ? `+${play.mods.join("")}` : null,
@@ -168,14 +168,14 @@ function HighlightList({
                       .join(" · ")}
                   </p>
                   <Link
-                    className="mt-1 inline-flex text-xs font-medium text-pink-700"
+                    className="mt-1 inline-flex text-xs font-medium text-pink-300"
                     href={`/sessions/${play.sessionId}`}
                   >
                     {play.sessionName}
                   </Link>
                 </div>
                 <div className="shrink-0 text-right">
-                  <p className="text-sm font-semibold text-zinc-950">
+                  <p className="text-sm font-semibold text-zinc-50">
                     {formatPrimaryStat(play)}
                   </p>
                   <p className="mt-1 text-xs text-zinc-500">
@@ -190,7 +190,7 @@ function HighlightList({
         </div>
       ) : (
         <div className="px-4 py-5">
-          <p className="text-sm leading-6 text-zinc-700">{empty}</p>
+          <p className="text-sm leading-6 text-zinc-400">{empty}</p>
         </div>
       )}
     </div>
