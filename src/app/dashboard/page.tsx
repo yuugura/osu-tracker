@@ -19,6 +19,7 @@ import { getCurrentSession } from "@/lib/auth";
 import { connectMongoDB } from "@/lib/mongodb";
 import { getSessionStats } from "@/lib/sessionStats";
 import { PlayModel } from "@/models/Play";
+import { ImportRunModel } from "@/models/ImportRun";
 import { SessionModel } from "@/models/Session";
 
 export default async function DashboardPage() {
@@ -33,6 +34,11 @@ export default async function DashboardPage() {
   const sessions = await SessionModel.find({ userId: session.userId }).sort({
     createdAt: -1,
   });
+  const latestSchedulerRun = await ImportRunModel.findOne({
+    trigger: "scheduler",
+  })
+    .sort({ startedAt: -1 })
+    .lean();
   const sessionIds = sessions.map((osuSession) => osuSession._id);
   const plays = await PlayModel.find({
     sessionId: { $in: sessionIds },
@@ -152,7 +158,10 @@ export default async function DashboardPage() {
 
       <section className="grid gap-8 py-10 lg:grid-cols-[320px_1fr]">
         <div className="space-y-4">
-          <ImportStatusPanel session={latestImportedSession} />
+          <ImportStatusPanel
+            schedulerRun={latestSchedulerRun}
+            session={latestImportedSession}
+          />
           <form
             action="/api/sessions/import-recent"
             className="h-fit rounded-md border border-zinc-200 p-5"
@@ -187,8 +196,10 @@ export default async function DashboardPage() {
 }
 
 function ImportStatusPanel({
+  schedulerRun,
   session,
 }: {
+  schedulerRun: ImportStatusRun | null | undefined;
   session: ImportStatusSession | null | undefined;
 }) {
   return (
@@ -221,6 +232,24 @@ function ImportStatusPanel({
           No imports have completed yet.
         </p>
       )}
+      <div className="mt-5 border-t border-zinc-200 pt-4">
+        <p className="text-xs font-medium uppercase tracking-wide text-zinc-500">
+          Scheduler
+        </p>
+        {schedulerRun ? (
+          <p className="mt-2 text-sm leading-6 text-zinc-700">
+            Last run {schedulerRun.status} at{" "}
+            {schedulerRun.finishedAt?.toLocaleString() ??
+              schedulerRun.startedAt.toLocaleString()}
+            . {schedulerRun.successCount ?? 0} succeeded /{" "}
+            {schedulerRun.failureCount ?? 0} failed.
+          </p>
+        ) : (
+          <p className="mt-2 text-sm leading-6 text-zinc-700">
+            No scheduler runs recorded yet.
+          </p>
+        )}
+      </div>
     </section>
   );
 }
@@ -232,6 +261,14 @@ type ImportStatusSession = {
   lastImportAt?: Date | null;
   lastImportFailedScoreCount?: number | null;
   lastImportScoreCount?: number | null;
+};
+
+type ImportStatusRun = {
+  failureCount?: number | null;
+  finishedAt?: Date | null;
+  startedAt: Date;
+  status: string;
+  successCount?: number | null;
 };
 
 function SmallStat({ label, value }: { label: string; value: string }) {

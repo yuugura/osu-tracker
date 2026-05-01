@@ -17,7 +17,7 @@ A Next.js app for tracking osu! play sessions. Log in with osu!, import recent p
   - rank breakdown
   - searchable play list
 - Dashboard with:
-  - last import status panel with returned score count, failed count, and AI summary timestamp
+  - last import status panel with returned score count, failed count, AI summary timestamp, and scheduler run status
   - personal highlights for play count, top PP plays, best accuracy plays, and maps to retry across 24h, 7d, and all imported plays
   - session search across contained plays
   - selectable trend line chart for play count, playtime, score, PP, accuracy, passed, and failed counts
@@ -94,7 +94,6 @@ SESSION_SECRET=
 GEMINI_API_KEY=
 GEMINI_SUMMARY_MODEL=gemini-2.5-flash
 CRON_SECRET=
-AUTO_IMPORT_INTERVAL_MINUTES=15
 ```
 
 For the osu! OAuth application, use this local callback URL:
@@ -137,15 +136,41 @@ npm run lint
 npm run build
 ```
 
-Run with Docker:
+## Scheduled Imports
 
-```bash
-docker compose up --build
+Vercel Cron is configured in `vercel.json` to call:
+
+```text
+GET /api/cron/import-recent
 ```
 
-The `app` service runs Next.js. The `auto-import` service calls
-`POST /api/admin/import-recent` every `AUTO_IMPORT_INTERVAL_MINUTES` minutes
-using `CRON_SECRET`.
+The route uses `CRON_SECRET` for authorization. Set `CRON_SECRET` in Vercel
+project environment variables before enabling the cron job. The route imports
+recent plays for all stored users, refreshes osu! tokens when needed, records an
+`ImportRun`, and generates session summaries best-effort.
+
+## Vercel Deployment Notes
+
+- Use the stable Vercel production domain for OAuth, not a one-off deployment URL.
+- In the osu! OAuth app, keep the local callback and add the production callback:
+
+```text
+http://localhost:3000/api/auth/osu/callback
+https://your-app.vercel.app/api/auth/osu/callback
+```
+
+- In Vercel production environment variables, set:
+
+```text
+OSU_REDIRECT_URI=https://your-app.vercel.app/api/auth/osu/callback
+NEXT_PUBLIC_APP_URL=https://your-app.vercel.app
+```
+
+- MongoDB Atlas must allow Vercel serverless functions to connect. If you do
+  not have fixed outbound IPs, add `0.0.0.0/0` in Atlas Network Access and use a
+  strong database user password.
+- Check production errors in Vercel under Project -> Logs or Deployment ->
+  Runtime Logs.
 
 ## Notes
 
@@ -156,12 +181,13 @@ using `CRON_SECRET`.
 - `GEMINI_SUMMARY_MODEL` defaults to `gemini-2.5-flash` when omitted.
 - Community leaderboards rank users from imported app data only, not all osu! players globally.
 - Current automation imports when the dashboard is opened and throttles imports in the browser.
-- Docker automatic importing is available through the `auto-import` service.
+- Vercel Cron handles production automatic importing through `/api/cron/import-recent`.
 - The protected automatic import endpoint refreshes osu! tokens before importing when needed.
+- Import runs are recorded in MongoDB for manual, dashboard-auto, and scheduler imports.
 
 ## Roadmap
 
 - Improve score-page links for failed plays where osu! exposes a reliable URL
 - Add richer filters for session plays
 - Add charts for more session stats
-- Polish Docker deployment and production environment defaults
+- Polish Vercel deployment and production environment defaults

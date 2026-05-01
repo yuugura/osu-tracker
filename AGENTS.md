@@ -32,6 +32,9 @@
 - UI components live in `src/components`.
 - AI session summary generation lives in `src/lib/aiSessionSummary.ts` and runs automatically from `src/app/api/sessions/import-recent/route.ts` after imports.
 - Shared import logic lives in `src/lib/recentImport.ts`; manual and automatic imports should use it.
+- Vercel Cron calls `src/app/api/cron/import-recent/route.ts`; keep it protected by `CRON_SECRET`.
+- Vercel production OAuth should use the stable production domain in `NEXT_PUBLIC_APP_URL`, `OSU_REDIRECT_URI`, and the osu! OAuth callback.
+- MongoDB Atlas Network Access must allow Vercel serverless connections.
 - Gemini summaries use `GEMINI_API_KEY` and `GEMINI_SUMMARY_MODEL`; do not send tokens, cookies, or secrets to the model.
 - AI summary generation should be best-effort: imports must still succeed if Gemini is unavailable or unconfigured.
 - For Gemini 2.5 Flash summaries, keep `thinkingBudget: 0` unless there is a clear need for reasoning, otherwise short responses can be truncated by hidden thinking tokens.

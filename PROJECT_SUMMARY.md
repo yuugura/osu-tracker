@@ -21,6 +21,7 @@ osu! Session Tracker is a Next.js App Router app for logging in with osu!, impor
 - Initialized the Next.js app at the repository root.
 - Normalized the project to use `src/app`.
 - Added MongoDB/Mongoose setup.
+- Added import run logging for manual, dashboard-auto, and scheduler imports.
 - Added `.env.example`.
 - Replaced generic generated docs with project-specific `README.md` and `AGENTS.md`.
 
@@ -38,7 +39,9 @@ osu! Session Tracker is a Next.js App Router app for logging in with osu!, impor
   - `User`
   - `Session`
   - `Play`
+  - `ImportRun`
 - Sessions store import metadata and osu! profile totals.
+- Import runs store trigger, status, totals, timing, and per-user failures.
 - Plays store score metadata including rank, accuracy, score, PP, mods, failed/passed state, beatmap length, score URL, mapper, and tags when available.
 
 ### Import Flow
@@ -48,7 +51,7 @@ osu! Session Tracker is a Next.js App Router app for logging in with osu!, impor
 - Added shared recent-play import logic used by manual and automatic imports.
 - Added osu! token refresh before imports so long-running automation can keep working.
 - Added a protected automatic import endpoint for all stored users.
-- Added Docker support with an `auto-import` service that calls the automatic import endpoint on an interval.
+- Added Vercel Cron support for scheduled all-user imports.
 - Imports reuse the current rolling 24-hour session instead of creating a new session every click.
 - Imports avoid duplicate plays through score import keys.
 - Added support for failed plays via `include_fails=1`.
@@ -58,7 +61,7 @@ osu! Session Tracker is a Next.js App Router app for logging in with osu!, impor
 
 - Added session list.
 - Added delete session button.
-- Added last import status panel with returned score count, failed count, and AI summary timestamp.
+- Added last import status panel with returned score count, failed count, AI summary timestamp, and scheduler run status.
 - Added personal highlights with 24h, 7d, and all-imported timeframes:
   - play count
   - passed/failed counts
@@ -124,7 +127,9 @@ osu! Session Tracker is a Next.js App Router app for logging in with osu!, impor
 - The app uses its own signed app session cookie after osu! OAuth succeeds.
 - Sessions are rolling 24-hour buckets because osu!'s recent scores view is also recent-window oriented.
 - Automatic importing currently happens when the dashboard is opened, not from a deployed background job.
-- Docker automatic importing can run through the `auto-import` service.
+- Vercel Cron is the production scheduler for automatic imports.
+- Production OAuth should use the stable Vercel production domain, not unique deployment URLs.
+- MongoDB Atlas Network Access needs to allow Vercel serverless connections; `0.0.0.0/0` works when fixed outbound IPs are not available.
 - AI summaries are generated after imports rather than manually regenerated from session pages.
 - AI generation is best-effort so osu! play imports are not blocked by Gemini failures or missing API keys.
 - Gemini is the current AI provider because it has a practical free tier for small development usage.
@@ -144,7 +149,6 @@ SESSION_SECRET=
 GEMINI_API_KEY=
 GEMINI_SUMMARY_MODEL=gemini-2.5-flash
 CRON_SECRET=
-AUTO_IMPORT_INTERVAL_MINUTES=15
 ```
 
 ## Known Caveats
@@ -153,14 +157,17 @@ AUTO_IMPORT_INTERVAL_MINUTES=15
 - Mapper and tags only appear when osu! includes those fields in imported score payloads.
 - Existing old plays may be missing newer fields until they are re-imported or migrated.
 - PP session totals are summed from imported scores when available; osu! profile PP is weighted, so this is not an exact net profile PP gain.
-- Browser-throttled auto import is not a replacement for the Docker scheduler in production.
+- Browser-throttled auto import is not a replacement for Vercel Cron in production.
+- If production OAuth redirects to `invalid_oauth_state`, check that `NEXT_PUBLIC_APP_URL`, `OSU_REDIRECT_URI`, and the osu! OAuth callback all use the same stable Vercel domain.
+- If production OAuth redirects to `oauth_callback_failed` with a MongoDB server selection error, check Atlas Network Access.
 - AI summaries require a Gemini API key and run after recent-play imports.
 - Gemini free-tier requests may be used by Google to improve products; keep summary prompts limited to non-secret play/session metadata.
 - Previously generated short or partial summaries may need another import to be replaced.
 
 ## Good Next Steps
 
-- Polish Docker deployment and production environment defaults.
+- Add a shared app shell/navigation for Dashboard, Community, and Session pages.
+- Polish production UI and mobile layout.
 - Add richer filters for plays and sessions.
 - Add chart options for cumulative vs per-session stats.
 - Improve handling and linking of failed plays if osu! exposes more reliable identifiers.

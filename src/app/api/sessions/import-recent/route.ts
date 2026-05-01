@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getCurrentSession } from "@/lib/auth";
 import { connectMongoDB } from "@/lib/mongodb";
 import { importRecentPlaysForUser } from "@/lib/recentImport";
+import { ImportRunModel } from "@/models/ImportRun";
 
 export const runtime = "nodejs";
 
@@ -13,10 +14,56 @@ export async function POST(request: NextRequest) {
   }
 
   await connectMongoDB();
-  const result = await importRecentPlaysForUser({
-    osuUserId: authSession.osuUserId,
-    userId: authSession.userId,
+  const startedAt = new Date();
+  const trigger = isFormRequest(request) ? "manual" : "dashboard-auto";
+  const importRun = await ImportRunModel.create({
+    startedAt,
+    status: "running",
+    trigger,
+    userCount: 1,
   });
+  let result: Awaited<ReturnType<typeof importRecentPlaysForUser>>;
+
+  try {
+    result = await importRecentPlaysForUser({
+      osuUserId: authSession.osuUserId,
+      userId: authSession.userId,
+    });
+
+    await ImportRunModel.updateOne(
+      { _id: importRun._id },
+      {
+        $set: {
+          failureCount: 0,
+          finishedAt: new Date(),
+          importedPlayCount: result.importedCount,
+          recentScoreCount: result.recentScoreCount,
+          status: "success",
+          successCount: 1,
+        },
+      },
+    );
+  } catch (error) {
+    await ImportRunModel.updateOne(
+      { _id: importRun._id },
+      {
+        $set: {
+          failureCount: 1,
+          failures: [
+            {
+              error: error instanceof Error ? error.message : "Unknown import error",
+              userId: authSession.userId,
+            },
+          ],
+          finishedAt: new Date(),
+          status: "failed",
+          successCount: 0,
+        },
+      },
+    );
+
+    throw error;
+  }
 
   if (isFormRequest(request)) {
     return NextResponse.redirect(
@@ -28,6 +75,7 @@ export async function POST(request: NextRequest) {
   return NextResponse.json(
     {
       importedCount: result.importedCount,
+      importRunId: importRun._id.toString(),
       sessionId: result.sessionId,
     },
     { status: 201 },

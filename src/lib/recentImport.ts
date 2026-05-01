@@ -16,6 +16,18 @@ type ImportUserInput = {
   userId: string;
 };
 
+type ImportUserResult = Awaited<ReturnType<typeof importRecentPlaysForUser>>;
+type ImportAllUsersResult =
+  | {
+      ok: true;
+      result: ImportUserResult;
+    }
+  | {
+      error: string;
+      ok: false;
+      userId: string;
+    };
+
 export async function importRecentPlaysForUser({
   osuUserId,
   userId,
@@ -129,7 +141,7 @@ export async function importRecentPlaysForAllUsers() {
   })
     .select("_id osuUserId")
     .lean();
-  const results = [];
+  const results: ImportAllUsersResult[] = [];
 
   for (const user of users) {
     try {
@@ -153,6 +165,30 @@ export async function importRecentPlaysForAllUsers() {
   return {
     results,
     userCount: users.length,
+  };
+}
+
+export function summarizeImportResults(
+  results: ImportAllUsersResult[],
+) {
+  const successes = results.filter((result) => result.ok);
+  const failures = results.filter((result) => !result.ok);
+
+  return {
+    failureCount: failures.length,
+    failures: failures.map((failure) => ({
+      error: "error" in failure ? failure.error : "Unknown import error",
+      userId: "userId" in failure ? failure.userId : undefined,
+    })),
+    importedPlayCount: successes.reduce(
+      (total, result) => total + result.result.importedCount,
+      0,
+    ),
+    recentScoreCount: successes.reduce(
+      (total, result) => total + result.result.recentScoreCount,
+      0,
+    ),
+    successCount: successes.length,
   };
 }
 
