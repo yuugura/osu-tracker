@@ -24,6 +24,32 @@ const sessionSchema = new Schema(
       type: Number,
       default: 0,
     },
+    profilePlayCount: {
+      type: Number,
+    },
+    profilePlayTime: {
+      type: Number,
+    },
+    profilePp: {
+      type: Number,
+    },
+    profileGradeCounts: {
+      a: {
+        type: Number,
+      },
+      s: {
+        type: Number,
+      },
+      sh: {
+        type: Number,
+      },
+      ss: {
+        type: Number,
+      },
+      ssh: {
+        type: Number,
+      },
+    },
   },
   {
     timestamps: true,

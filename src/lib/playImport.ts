@@ -16,11 +16,14 @@ export function mapRecentScoreToPlay({
     userId,
     sessionId,
     osuScoreId: getScoreImportId(score),
+    osuScoreUrl: getScoreUrl(score),
     beatmapId: getBeatmapId(score),
     title: score.beatmapset?.title ?? getFallbackTitle(score),
     artist: score.beatmapset?.artist,
     difficulty: score.beatmap?.version,
     score: getScoreValue(score),
+    pp: score.pp ?? undefined,
+    beatmapLength: score.beatmap?.total_length ?? score.beatmap?.hit_length,
     passed: score.passed,
     accuracy: score.accuracy,
     rank: score.passed === false ? "F" : score.rank,
@@ -83,6 +86,16 @@ function getScoreImportId(score: OsuRecentScore) {
     score.rank,
     normalizeMods(score.mods).join(""),
   ].join(":");
+}
+
+function getScoreUrl(score: OsuRecentScore) {
+  const scoreId = score.id ?? score.legacy_score_id;
+
+  if (!scoreId) {
+    return undefined;
+  }
+
+  return `https://osu.ppy.sh/scores/${scoreId}`;
 }
 
 function getBeatmapId(score: OsuRecentScore) {

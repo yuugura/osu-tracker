@@ -43,7 +43,21 @@ export async function GET(
 }
 
 export async function DELETE(
-  _request: NextRequest,
+  request: NextRequest,
+  context: RouteContext<"/api/sessions/[id]">,
+) {
+  return deleteSession(request, context);
+}
+
+export async function POST(
+  request: NextRequest,
+  context: RouteContext<"/api/sessions/[id]">,
+) {
+  return deleteSession(request, context);
+}
+
+async function deleteSession(
+  request: NextRequest,
   context: RouteContext<"/api/sessions/[id]">,
 ) {
   const authSession = await getCurrentSession();
@@ -74,5 +88,20 @@ export async function DELETE(
     userId: authSession.userId,
   });
 
+  if (isFormRequest(request)) {
+    return NextResponse.redirect(new URL("/dashboard", request.url), {
+      status: 303,
+    });
+  }
+
   return NextResponse.json({ ok: true });
+}
+
+function isFormRequest(request: NextRequest) {
+  return (
+    request.headers
+      .get("content-type")
+      ?.includes("application/x-www-form-urlencoded") ||
+    request.headers.get("content-type")?.includes("multipart/form-data")
+  );
 }

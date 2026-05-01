@@ -9,6 +9,18 @@ export type OsuUserResponse = {
   id: number;
   username: string;
   avatar_url?: string;
+  statistics?: {
+    grade_counts?: {
+      a?: number;
+      s?: number;
+      sh?: number;
+      ss?: number;
+      ssh?: number;
+    };
+    play_count?: number;
+    play_time?: number | null;
+    pp?: number | null;
+  };
 };
 
 export type OsuRecentScore = {
@@ -20,6 +32,7 @@ export type OsuRecentScore = {
   total_score?: number;
   legacy_total_score?: number;
   classic_total_score?: number;
+  pp?: number | null;
   rank: string;
   mods: Array<string | { acronym?: string }>;
   passed?: boolean;
@@ -29,6 +42,8 @@ export type OsuRecentScore = {
   beatmap?: {
     id: number;
     version: string;
+    total_length?: number;
+    hit_length?: number;
   };
   beatmapset?: {
     artist: string;

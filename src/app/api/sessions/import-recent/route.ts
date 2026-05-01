@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getCurrentSession } from "@/lib/auth";
 import { connectMongoDB } from "@/lib/mongodb";
-import { fetchRecentOsuScores } from "@/lib/osuApi";
+import { fetchOsuMe, fetchRecentOsuScores } from "@/lib/osuApi";
 import {
   getDefaultSessionName,
   getRecentSessionCutoff,
@@ -33,10 +33,10 @@ export async function POST(request: NextRequest) {
     );
   }
 
-  const recentScores = await fetchRecentOsuScores(
-    user.accessToken,
-    authSession.osuUserId,
-  );
+  const [profile, recentScores] = await Promise.all([
+    fetchOsuMe(user.accessToken),
+    fetchRecentOsuScores(user.accessToken, authSession.osuUserId),
+  ]);
   const failedScoreCount = recentScores.filter(isFailedScore).length;
   const now = new Date();
   const session = await SessionModel.findOneAndUpdate(
@@ -102,6 +102,10 @@ export async function POST(request: NextRequest) {
         lastImportAt: now,
         lastImportScoreCount: recentScores.length,
         lastImportFailedScoreCount: failedScoreCount,
+        profileGradeCounts: profile.statistics?.grade_counts,
+        profilePlayCount: profile.statistics?.play_count,
+        profilePlayTime: profile.statistics?.play_time,
+        profilePp: profile.statistics?.pp,
       },
     },
   );

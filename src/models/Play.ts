@@ -18,6 +18,9 @@ const playSchema = new Schema(
       type: String,
       index: true,
     },
+    osuScoreUrl: {
+      type: String,
+    },
     beatmapId: {
       type: String,
     },
@@ -35,6 +38,12 @@ const playSchema = new Schema(
       trim: true,
     },
     score: {
+      type: Number,
+    },
+    pp: {
+      type: Number,
+    },
+    beatmapLength: {
       type: Number,
     },
     passed: {

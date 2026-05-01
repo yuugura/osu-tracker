@@ -68,10 +68,10 @@ export function verifySessionToken(token: string): SessionPayload | null {
 }
 
 function sign(value: string) {
-  const secret = process.env.JWT_SECRET;
+  const secret = process.env.SESSION_SECRET;
 
   if (!secret) {
-    throw new Error("JWT_SECRET is not set");
+    throw new Error("SESSION_SECRET is not set");
   }
 
   return createHmac("sha256", secret).update(value).digest("base64url");
