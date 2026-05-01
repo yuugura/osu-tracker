@@ -13,13 +13,15 @@ A Next.js app for tracking osu! play sessions. Log in with osu!, import recent p
   - imported plays
   - rank, accuracy, score, PP, and score-page links
   - session summary stats
-  - opt-in Gemini AI session summaries
+  - Gemini AI session summaries generated after imports
   - rank breakdown
   - searchable play list
 - Dashboard with:
+  - personal highlights for play count, top PP plays, best accuracy plays, and maps to retry across 24h, 7d, and all imported plays
   - session search across contained plays
   - selectable trend line chart for play count, playtime, score, PP, accuracy, passed, and failed counts
   - delete session action
+- Community page with trending maps and app-user leaderboards for play volume and top imported PP plays
 
 ## Tech Stack
 
@@ -39,6 +41,7 @@ src/
     api/
       auth/
       sessions/
+    community/
     dashboard/
     sessions/[id]/
   components/
@@ -49,15 +52,16 @@ src/
 
 ## AI Session Summaries
 
-Session pages include an opt-in **AI session summary** panel. Clicking
-`Generate summary` calls:
+Session pages include a read-only **AI session summary** panel. Summaries are
+generated automatically after each successful recent-play import, including the
+dashboard auto import and the manual `Import now` action.
 
 ```text
-POST /api/sessions/[id]/ai-summary
+POST /api/sessions/import-recent
 ```
 
-The route verifies the logged-in user owns the session, loads imported plays,
-generates a concise review with Gemini, and stores the result on the session as:
+The import route saves any new plays, loads the full current session, generates
+a concise review with Gemini, and stores the result on the session as:
 
 ```text
 aiSummary.text
@@ -70,6 +74,10 @@ does not send osu! OAuth tokens, app session cookies, MongoDB credentials, or
 other secrets. The Gemini request sets `thinkingBudget: 0` because this is a
 short summarization task; without that, Gemini 2.5 Flash can spend the small
 token budget on hidden reasoning and return a truncated visible summary.
+
+AI summary generation is best-effort: if Gemini is unavailable or
+`GEMINI_API_KEY` is not configured, the play import still succeeds and the
+session keeps its previous summary, if any.
 
 ## Environment Variables
 
@@ -84,6 +92,8 @@ NEXT_PUBLIC_APP_URL=http://localhost:3000
 SESSION_SECRET=
 GEMINI_API_KEY=
 GEMINI_SUMMARY_MODEL=gemini-2.5-flash
+CRON_SECRET=
+AUTO_IMPORT_INTERVAL_MINUTES=15
 ```
 
 For the osu! OAuth application, use this local callback URL:
@@ -126,6 +136,16 @@ npm run lint
 npm run build
 ```
 
+Run with Docker:
+
+```bash
+docker compose up --build
+```
+
+The `app` service runs Next.js. The `auto-import` service calls
+`POST /api/admin/import-recent` every `AUTO_IMPORT_INTERVAL_MINUTES` minutes
+using `CRON_SECRET`.
+
 ## Notes
 
 - `.env.local` contains secrets and must not be committed.
@@ -133,12 +153,14 @@ npm run build
 - The app stores osu! access and refresh tokens in MongoDB for the logged-in user.
 - AI session summaries use the Gemini API and require `GEMINI_API_KEY`.
 - `GEMINI_SUMMARY_MODEL` defaults to `gemini-2.5-flash` when omitted.
-- Current automation imports when the dashboard is opened and throttles imports in the browser. Always-on background importing would require a deployed scheduled job and token refresh handling.
+- Community leaderboards rank users from imported app data only, not all osu! players globally.
+- Current automation imports when the dashboard is opened and throttles imports in the browser.
+- Docker automatic importing is available through the `auto-import` service.
+- The protected automatic import endpoint refreshes osu! tokens before importing when needed.
 
 ## Roadmap
 
 - Improve score-page links for failed plays where osu! exposes a reliable URL
 - Add richer filters for session plays
 - Add charts for more session stats
-- Add token refresh for long-lived imports
-- Add Vercel Cron or another scheduled importer after deployment
+- Polish Docker deployment and production environment defaults

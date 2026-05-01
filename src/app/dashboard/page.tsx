@@ -1,9 +1,16 @@
+import Link from "next/link";
 import { redirect } from "next/navigation";
 import { AutoImportRecentPlays } from "@/components/AutoImportRecentPlays";
 import {
   DashboardSessionSearch,
   type DashboardSearchSession,
 } from "@/components/DashboardSessionSearch";
+import {
+  DashboardHighlights,
+  type DashboardHighlightPlay,
+  type DashboardHighlightTimeframe,
+  type DashboardHighlightTimeframeKey,
+} from "@/components/DashboardHighlights";
 import {
   SessionStatsChart,
   type SessionChartPoint,
@@ -32,6 +39,9 @@ export default async function DashboardPage() {
     userId: session.userId,
   }).lean();
   const playsBySessionId = new Map<string, typeof plays>();
+  const sessionNameById = new Map(
+    sessions.map((osuSession) => [osuSession._id.toString(), osuSession.name]),
+  );
 
   for (const play of plays) {
     const sessionId = play.sessionId.toString();
@@ -84,6 +94,28 @@ export default async function DashboardPage() {
       };
     },
   );
+  const playsWithSession = plays.map((play) => {
+    const sessionId = play.sessionId.toString();
+
+    return {
+      accuracy: play.accuracy ?? null,
+      artist: play.artist ?? null,
+      beatmapId: play.beatmapId ?? null,
+      difficulty: play.difficulty ?? null,
+      id: play._id.toString(),
+      mods: play.mods ?? [],
+      osuScoreUrl: play.osuScoreUrl ?? null,
+      passed: play.passed ?? null,
+      playedAt: play.playedAt ?? null,
+      playedAtLabel: play.playedAt ? play.playedAt.toLocaleString() : null,
+      pp: play.pp ?? null,
+      rank: play.rank ?? null,
+      sessionId,
+      sessionName: sessionNameById.get(sessionId) ?? "Session",
+      title: play.title,
+    };
+  });
+  const highlights = getDashboardHighlights(playsWithSession);
 
   return (
     <main className="mx-auto flex min-h-screen w-full max-w-5xl flex-col px-6 py-12">
@@ -97,14 +129,23 @@ export default async function DashboardPage() {
             Your osu! sessions
           </h1>
         </div>
-        <form action="/api/auth/logout" method="post">
-          <button className="rounded-md border border-zinc-300 px-3 py-2 text-sm font-medium text-zinc-800 hover:bg-zinc-100">
-            Log out
-          </button>
-        </form>
+        <div className="flex items-center gap-3">
+          <Link
+            className="text-sm font-medium text-pink-700"
+            href="/community"
+          >
+            Community
+          </Link>
+          <form action="/api/auth/logout" method="post">
+            <button className="rounded-md border border-zinc-300 px-3 py-2 text-sm font-medium text-zinc-800 hover:bg-zinc-100">
+              Log out
+            </button>
+          </form>
+        </div>
       </div>
 
       <SessionStatsChart data={chartData} />
+      <DashboardHighlights highlights={highlights} />
 
       <section className="grid gap-8 py-10 lg:grid-cols-[320px_1fr]">
         <form
@@ -137,4 +178,132 @@ export default async function DashboardPage() {
       </section>
     </main>
   );
+}
+
+type DashboardPlayWithSession = DashboardHighlightPlay & {
+  passed: boolean | null;
+  playedAt: Date | null;
+};
+
+function getDashboardHighlights(plays: DashboardPlayWithSession[]) {
+  return {
+    "24h": getHighlightTimeframe(plays, "Last 24h", 1),
+    "7d": getHighlightTimeframe(plays, "Last 7d", 7),
+    all: getHighlightTimeframe(plays, "All imported", null),
+  } satisfies Record<DashboardHighlightTimeframeKey, DashboardHighlightTimeframe>;
+}
+
+function getHighlightTimeframe(
+  plays: DashboardPlayWithSession[],
+  label: string,
+  days: number | null,
+) {
+  const cutoff = days === null ? null : getRecentCutoffTime(days);
+  const timeframePlays =
+    cutoff === null
+      ? plays
+      : plays.filter(
+          (play) => play.playedAt && play.playedAt.getTime() >= cutoff,
+        );
+  const failedPlays = timeframePlays.filter(isFailedPlay);
+
+  return {
+    bestAccuracy: getBestAccuracyPlays(timeframePlays, 5),
+    failedCount: failedPlays.length,
+    failedPlays: getRetryMaps(failedPlays, 5),
+    label,
+    passedCount: timeframePlays.filter((play) => !isFailedPlay(play)).length,
+    playCount: timeframePlays.length,
+    topPp: getTopPpPlays(timeframePlays, 5),
+  };
+}
+
+function getTopPpPlays(plays: DashboardPlayWithSession[], limit: number) {
+  return plays
+    .filter((play) => typeof play.pp === "number")
+    .sort((a, b) => (b.pp ?? 0) - (a.pp ?? 0))
+    .slice(0, limit)
+    .map(toHighlightPlay);
+}
+
+function getBestAccuracyPlays(
+  plays: DashboardPlayWithSession[],
+  limit: number,
+) {
+  return plays
+    .filter((play) => typeof play.accuracy === "number" && !isFailedPlay(play))
+    .sort((a, b) => {
+      const accuracyDifference = (b.accuracy ?? 0) - (a.accuracy ?? 0);
+
+      if (accuracyDifference !== 0) {
+        return accuracyDifference;
+      }
+
+      return (b.pp ?? 0) - (a.pp ?? 0);
+    })
+    .slice(0, limit)
+    .map(toHighlightPlay);
+}
+
+function getRetryMaps(plays: DashboardPlayWithSession[], limit: number) {
+  const retryMapByKey = new Map<string, DashboardPlayWithSession>();
+
+  for (const play of plays) {
+    const key = getMapKey(play);
+    const existingPlay = retryMapByKey.get(key);
+
+    if (
+      !existingPlay ||
+      (play.playedAt?.getTime() ?? 0) > (existingPlay.playedAt?.getTime() ?? 0)
+    ) {
+      retryMapByKey.set(key, play);
+    }
+  }
+
+  return [...retryMapByKey.values()]
+    .sort((a, b) => (b.playedAt?.getTime() ?? 0) - (a.playedAt?.getTime() ?? 0))
+    .slice(0, limit)
+    .map(toHighlightPlay);
+}
+
+function toHighlightPlay(
+  play: DashboardPlayWithSession,
+): DashboardHighlightPlay {
+  return {
+    accuracy: play.accuracy,
+    artist: play.artist,
+    beatmapId: play.beatmapId,
+    difficulty: play.difficulty,
+    id: play.id,
+    mods: play.mods,
+    osuScoreUrl: play.osuScoreUrl,
+    playedAtLabel: play.playedAtLabel,
+    pp: play.pp,
+    rank: play.rank,
+    sessionId: play.sessionId,
+    sessionName: play.sessionName,
+    title: play.title,
+  };
+}
+
+function isFailedPlay(play: DashboardPlayWithSession) {
+  return play.passed === false || play.rank === "F";
+}
+
+function getMapKey(play: DashboardPlayWithSession) {
+  if (play.beatmapId) {
+    return `beatmap:${play.beatmapId}`;
+  }
+
+  return [
+    play.artist ?? "",
+    play.title,
+    play.difficulty ?? "",
+  ]
+    .join(":")
+    .toLowerCase();
+}
+
+function getRecentCutoffTime(days: number) {
+  return Date.now() - days * 24 * 60 * 60 * 1000;
 }

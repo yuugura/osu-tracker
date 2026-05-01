@@ -45,6 +45,10 @@ osu! Session Tracker is a Next.js App Router app for logging in with osu!, impor
 
 - Added one-click recent-play import.
 - Added automatic dashboard import throttled in the browser.
+- Added shared recent-play import logic used by manual and automatic imports.
+- Added osu! token refresh before imports so long-running automation can keep working.
+- Added a protected automatic import endpoint for all stored users.
+- Added Docker support with an `auto-import` service that calls the automatic import endpoint on an interval.
 - Imports reuse the current rolling 24-hour session instead of creating a new session every click.
 - Imports avoid duplicate plays through score import keys.
 - Added support for failed plays via `include_fails=1`.
@@ -54,6 +58,12 @@ osu! Session Tracker is a Next.js App Router app for logging in with osu!, impor
 
 - Added session list.
 - Added delete session button.
+- Added personal highlights with 24h, 7d, and all-imported timeframes:
+  - play count
+  - passed/failed counts
+  - highest PP plays
+  - best accuracy plays
+  - maps to retry based on failed plays, collapsed to one row per map
 - Added selectable trend chart for:
   - play count
   - playtime
@@ -63,6 +73,24 @@ osu! Session Tracker is a Next.js App Router app for logging in with osu!, impor
   - passed count
   - failed count
 - Added dashboard search that filters sessions by contained play metadata.
+
+### Community
+
+- Added `/community` as a separate navigation tab from the personal dashboard.
+- Added trending map leaderboards for the last 24 hours and last 7 days:
+  - play count
+  - unique player count
+  - fail count
+  - average accuracy
+  - top PP on the map
+- Added app-user leaderboards based on imported database plays:
+  - most plays in the last 24 hours
+  - most plays in the last 7 days
+  - highest PP plays in the last 24 hours
+  - highest PP plays in the last 7 days
+  - highest PP plays across all imported data
+- Leaderboards show osu! usernames and link out to osu! profiles.
+- Community rankings are based only on users and plays in this app database, not global osu! data.
 
 ### Session Detail
 
@@ -84,8 +112,8 @@ osu! Session Tracker is a Next.js App Router app for logging in with osu!, impor
 - Added failed play badges.
 - Added score-page links and explicit `View score` buttons when osu! exposes a usable score URL.
 - Added play search inside a session.
-- Added opt-in AI session summaries using the Gemini API.
-- AI summaries are generated from imported play metadata and session stats, then stored on the `Session` document.
+- Added read-only AI session summaries using the Gemini API.
+- AI summaries are generated automatically after recent-play imports from imported play metadata and session stats, then stored on the `Session` document.
 - Gemini summary generation disables thinking with `thinkingBudget: 0` to avoid very short truncated summaries on simple recap prompts.
 
 ## Important Decisions
@@ -95,9 +123,11 @@ osu! Session Tracker is a Next.js App Router app for logging in with osu!, impor
 - The app uses its own signed app session cookie after osu! OAuth succeeds.
 - Sessions are rolling 24-hour buckets because osu!'s recent scores view is also recent-window oriented.
 - Automatic importing currently happens when the dashboard is opened, not from a deployed background job.
-- True always-on importing will need deployed scheduled jobs and refresh-token handling.
-- AI summaries are user-triggered from session pages rather than generated automatically.
+- Docker automatic importing can run through the `auto-import` service.
+- AI summaries are generated after imports rather than manually regenerated from session pages.
+- AI generation is best-effort so osu! play imports are not blocked by Gemini failures or missing API keys.
 - Gemini is the current AI provider because it has a practical free tier for small development usage.
+- Community leaderboards are not opt-in right now; any user with imported plays can appear in app-user rankings.
 
 ## Environment Variables
 
@@ -112,6 +142,8 @@ NEXT_PUBLIC_APP_URL=http://localhost:3000
 SESSION_SECRET=
 GEMINI_API_KEY=
 GEMINI_SUMMARY_MODEL=gemini-2.5-flash
+CRON_SECRET=
+AUTO_IMPORT_INTERVAL_MINUTES=15
 ```
 
 ## Known Caveats
@@ -120,15 +152,14 @@ GEMINI_SUMMARY_MODEL=gemini-2.5-flash
 - Mapper and tags only appear when osu! includes those fields in imported score payloads.
 - Existing old plays may be missing newer fields until they are re-imported or migrated.
 - PP session totals are summed from imported scores when available; osu! profile PP is weighted, so this is not an exact net profile PP gain.
-- Browser-throttled auto import is not a replacement for scheduled server-side importing.
-- AI summaries require a Gemini API key and only run when generated from a session page.
+- Browser-throttled auto import is not a replacement for the Docker scheduler in production.
+- AI summaries require a Gemini API key and run after recent-play imports.
 - Gemini free-tier requests may be used by Google to improve products; keep summary prompts limited to non-secret play/session metadata.
-- Previously generated short or partial summaries may need to be refreshed from the session page.
+- Previously generated short or partial summaries may need another import to be replaced.
 
 ## Good Next Steps
 
-- Add token refresh so imports keep working after access tokens expire.
-- Add a deployed scheduled import path, such as Vercel Cron.
+- Polish Docker deployment and production environment defaults.
 - Add richer filters for plays and sessions.
 - Add chart options for cumulative vs per-session stats.
 - Improve handling and linking of failed plays if osu! exposes more reliable identifiers.

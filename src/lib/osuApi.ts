@@ -38,6 +38,35 @@ export async function exchangeOsuCode(code: string) {
   return (await response.json()) as OsuTokenResponse;
 }
 
+export async function refreshOsuToken(refreshToken: string) {
+  const clientId = process.env.OSU_CLIENT_ID;
+  const clientSecret = process.env.OSU_CLIENT_SECRET;
+
+  if (!clientId || !clientSecret) {
+    throw new Error("osu! OAuth environment variables are not set");
+  }
+
+  const response = await fetch(OSU_TOKEN_URL, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Accept: "application/json",
+    },
+    body: JSON.stringify({
+      client_id: Number(clientId),
+      client_secret: clientSecret,
+      grant_type: "refresh_token",
+      refresh_token: refreshToken,
+    }),
+  });
+
+  if (!response.ok) {
+    throw new Error("Failed to refresh osu! access token");
+  }
+
+  return (await response.json()) as OsuTokenResponse;
+}
+
 export async function fetchOsuMe(accessToken: string) {
   return fetchOsuApi<OsuUserResponse>("/me", accessToken);
 }

@@ -177,7 +177,6 @@ export default async function SessionPage({ params }: SessionPageProps) {
           text: session.aiSummary?.text ?? null,
         }}
         playCount={playCount}
-        sessionId={id}
       />
 
       <section className="border-b border-zinc-200 py-8">

@@ -42,7 +42,7 @@ export async function GET(request: NextRequest) {
         },
       },
       {
-        new: true,
+        returnDocument: "after",
         setDefaultsOnInsert: true,
         upsert: true,
       },
