@@ -1,6 +1,9 @@
-import Link from "next/link";
 import { redirect } from "next/navigation";
 import { AutoImportRecentPlays } from "@/components/AutoImportRecentPlays";
+import {
+  DashboardSessionSearch,
+  type DashboardSearchSession,
+} from "@/components/DashboardSessionSearch";
 import {
   SessionStatsChart,
   type SessionChartPoint,
@@ -59,6 +62,28 @@ export default async function DashboardPage() {
         scoreTotal: sessionStats.scoreTotal,
       };
     });
+  const searchableSessions: DashboardSearchSession[] = sessions.map(
+    (osuSession) => {
+      const sessionPlays = playsBySessionId.get(osuSession._id.toString()) ?? [];
+
+      return {
+        createdAtLabel: osuSession.createdAt.toLocaleDateString(),
+        id: osuSession._id.toString(),
+        name: osuSession.name,
+        playCount: sessionPlays.length,
+        plays: sessionPlays.map((play) => ({
+          artist: play.artist ?? null,
+          beatmapId: play.beatmapId ?? null,
+          difficulty: play.difficulty ?? null,
+          mapper: play.mapper ?? null,
+          mods: play.mods ?? [],
+          rank: play.rank ?? null,
+          tags: play.tags ?? [],
+          title: play.title,
+        })),
+      };
+    },
+  );
 
   return (
     <main className="mx-auto flex min-h-screen w-full max-w-5xl flex-col px-6 py-12">
@@ -99,45 +124,8 @@ export default async function DashboardPage() {
         </form>
 
         <div>
-          <h2 className="text-lg font-semibold text-zinc-950">
-            Recent sessions
-          </h2>
           {sessions.length > 0 ? (
-            <div className="mt-4 divide-y divide-zinc-200 rounded-md border border-zinc-200">
-              {sessions.map((osuSession) => (
-                <div className="px-4 py-4" key={osuSession._id.toString()}>
-                  <div className="flex items-center justify-between gap-4">
-                    <Link
-                      className="min-w-0 flex-1 hover:text-pink-700"
-                      href={`/sessions/${osuSession._id.toString()}`}
-                    >
-                      <h3 className="font-medium text-zinc-950">
-                        {osuSession.name}
-                      </h3>
-                      <p className="mt-1 text-sm text-zinc-600">
-                        Created {osuSession.createdAt.toLocaleDateString()}
-                      </p>
-                    </Link>
-                    <div className="flex items-center gap-3">
-                      <Link
-                        className="text-sm font-medium text-pink-700"
-                        href={`/sessions/${osuSession._id.toString()}`}
-                      >
-                        Open
-                      </Link>
-                      <form
-                        action={`/api/sessions/${osuSession._id.toString()}`}
-                        method="post"
-                      >
-                        <button className="rounded-md border border-red-200 px-3 py-1.5 text-sm font-medium text-red-700 hover:bg-red-50">
-                          Delete
-                        </button>
-                      </form>
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
+            <DashboardSessionSearch sessions={searchableSessions} />
           ) : (
             <div className="mt-4 rounded-md border border-dashed border-zinc-300 p-6">
               <p className="text-sm leading-6 text-zinc-700">

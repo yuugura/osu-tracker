@@ -47,6 +47,8 @@ export type OsuRecentScore = {
   };
   beatmapset?: {
     artist: string;
+    creator?: string;
+    tags?: string;
     title: string;
   };
 };

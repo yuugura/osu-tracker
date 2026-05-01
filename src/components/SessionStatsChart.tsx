@@ -152,11 +152,11 @@ export function SessionStatsChart({ data }: { data: SessionChartPoint[] }) {
               />
             ) : null}
             {chart.points.map((point) => (
-              <g key={point.id}>
+              <g
+                aria-label={`${point.name}: ${metric.format(point.value)}`}
+                key={point.id}
+              >
                 <circle cx={point.x} cy={point.y} fill="#db2777" r="4" />
-                <title>
-                  {point.name}: {metric.format(point.value)}
-                </title>
               </g>
             ))}
             {chart.points.map((point, index) => {

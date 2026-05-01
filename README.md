@@ -1,36 +1,115 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# osu! Session Tracker
 
-## Getting Started
+A Next.js app for tracking osu! play sessions. Log in with osu!, import recent plays, and review session history with play lists, stats, search, and trend charts.
 
-First, run the development server:
+## Features
+
+- osu! OAuth login
+- MongoDB-backed user/session/play storage
+- Automatic recent-play imports on dashboard load
+- Manual import button for the current 24-hour session
+- Failed play import support when osu! returns failed scores
+- Session detail pages with:
+  - imported plays
+  - rank, accuracy, score, PP, and score-page links
+  - session summary stats
+  - rank breakdown
+  - searchable play list
+- Dashboard with:
+  - session search across contained plays
+  - selectable trend line chart for play count, playtime, score, PP, accuracy, passed, and failed counts
+  - delete session action
+
+## Tech Stack
+
+- Next.js App Router
+- React
+- TypeScript
+- Tailwind CSS
+- MongoDB Atlas
+- Mongoose
+- osu! API v2 OAuth
+
+## Project Structure
+
+```text
+src/
+  app/
+    api/
+      auth/
+      sessions/
+    dashboard/
+    sessions/[id]/
+  components/
+  lib/
+  models/
+  types/
+```
+
+## Environment Variables
+
+Create `.env.local` in the project root.
+
+```text
+MONGODB_URI=
+OSU_CLIENT_ID=
+OSU_CLIENT_SECRET=
+OSU_REDIRECT_URI=http://localhost:3000/api/auth/osu/callback
+NEXT_PUBLIC_APP_URL=http://localhost:3000
+SESSION_SECRET=
+```
+
+For the osu! OAuth application, use this local callback URL:
+
+```text
+http://localhost:3000/api/auth/osu/callback
+```
+
+For production, update these values:
+
+```text
+OSU_REDIRECT_URI=https://your-app.vercel.app/api/auth/osu/callback
+NEXT_PUBLIC_APP_URL=https://your-app.vercel.app
+```
+
+## Development
+
+Install dependencies:
+
+```bash
+npm install
+```
+
+Run the dev server:
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open:
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+```text
+http://localhost:3000
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+Validate:
 
-## Learn More
+```bash
+npm run lint
+npm run build
+```
 
-To learn more about Next.js, take a look at the following resources:
+## Notes
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+- `.env.local` contains secrets and must not be committed.
+- `.env.example` documents required variables only.
+- The app stores osu! access and refresh tokens in MongoDB for the logged-in user.
+- Current automation imports when the dashboard is opened and throttles imports in the browser. Always-on background importing would require a deployed scheduled job and token refresh handling.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Roadmap
 
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- Improve score-page links for failed plays where osu! exposes a reliable URL
+- Add richer filters for session plays
+- Add charts for more session stats
+- Add token refresh for long-lived imports
+- Add Vercel Cron or another scheduled importer after deployment

@@ -33,6 +33,14 @@ const playSchema = new Schema(
       type: String,
       trim: true,
     },
+    mapper: {
+      type: String,
+      trim: true,
+    },
+    tags: {
+      type: [String],
+      default: [],
+    },
     difficulty: {
       type: String,
       trim: true,

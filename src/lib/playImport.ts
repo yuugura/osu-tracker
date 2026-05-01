@@ -20,6 +20,8 @@ export function mapRecentScoreToPlay({
     beatmapId: getBeatmapId(score),
     title: score.beatmapset?.title ?? getFallbackTitle(score),
     artist: score.beatmapset?.artist,
+    mapper: score.beatmapset?.creator,
+    tags: normalizeTags(score.beatmapset?.tags),
     difficulty: score.beatmap?.version,
     score: getScoreValue(score),
     pp: score.pp ?? undefined,
@@ -63,6 +65,15 @@ function normalizeMods(mods: OsuRecentScore["mods"]) {
       return mod.acronym;
     })
     .filter((mod): mod is string => Boolean(mod));
+}
+
+function normalizeTags(tags?: string) {
+  return tags
+    ? tags
+        .split(/\s+/)
+        .map((tag) => tag.trim())
+        .filter(Boolean)
+    : [];
 }
 
 function getScoreImportId(score: OsuRecentScore) {
