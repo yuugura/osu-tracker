@@ -17,6 +17,7 @@ A Next.js app for tracking osu! play sessions. Log in with osu!, import recent p
   - rank breakdown
   - searchable play list
 - Dashboard with:
+  - last import status panel with returned score count, failed count, and AI summary timestamp
   - personal highlights for play count, top PP plays, best accuracy plays, and maps to retry across 24h, 7d, and all imported plays
   - session search across contained plays
   - selectable trend line chart for play count, playtime, score, PP, accuracy, passed, and failed counts

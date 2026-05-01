@@ -116,6 +116,9 @@ export default async function DashboardPage() {
     };
   });
   const highlights = getDashboardHighlights(playsWithSession);
+  const latestImportedSession = sessions.find((osuSession) =>
+    Boolean(osuSession.lastImportAt),
+  );
 
   return (
     <main className="mx-auto flex min-h-screen w-full max-w-5xl flex-col px-6 py-12">
@@ -148,21 +151,24 @@ export default async function DashboardPage() {
       <DashboardHighlights highlights={highlights} />
 
       <section className="grid gap-8 py-10 lg:grid-cols-[320px_1fr]">
-        <form
-          action="/api/sessions/import-recent"
-          className="h-fit rounded-md border border-zinc-200 p-5"
-          method="post"
-        >
-          <h2 className="text-lg font-semibold text-zinc-950">
-            Import recent plays
-          </h2>
-          <p className="mt-2 text-sm leading-6 text-zinc-700">
-            Uses your current 24-hour session, or creates one if needed.
-          </p>
-          <button className="mt-5 w-full rounded-md bg-pink-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-pink-700">
-            Import now
-          </button>
-        </form>
+        <div className="space-y-4">
+          <ImportStatusPanel session={latestImportedSession} />
+          <form
+            action="/api/sessions/import-recent"
+            className="h-fit rounded-md border border-zinc-200 p-5"
+            method="post"
+          >
+            <h2 className="text-lg font-semibold text-zinc-950">
+              Import recent plays
+            </h2>
+            <p className="mt-2 text-sm leading-6 text-zinc-700">
+              Uses your current 24-hour session, or creates one if needed.
+            </p>
+            <button className="mt-5 w-full rounded-md bg-pink-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-pink-700">
+              Import now
+            </button>
+          </form>
+        </div>
 
         <div>
           {sessions.length > 0 ? (
@@ -177,6 +183,65 @@ export default async function DashboardPage() {
         </div>
       </section>
     </main>
+  );
+}
+
+function ImportStatusPanel({
+  session,
+}: {
+  session: ImportStatusSession | null | undefined;
+}) {
+  return (
+    <section className="rounded-md border border-zinc-200 p-5">
+      <h2 className="text-lg font-semibold text-zinc-950">Import status</h2>
+      {session?.lastImportAt ? (
+        <>
+          <p className="mt-2 text-sm leading-6 text-zinc-700">
+            Last imported {session.lastImportAt.toLocaleString()}.
+          </p>
+          <div className="mt-4 grid grid-cols-2 gap-3">
+            <SmallStat
+              label="Returned"
+              value={String(session.lastImportScoreCount ?? 0)}
+            />
+            <SmallStat
+              label="Failed"
+              value={String(session.lastImportFailedScoreCount ?? 0)}
+            />
+          </div>
+          <p className="mt-4 text-xs leading-5 text-zinc-500">
+            AI summary{" "}
+            {session.aiSummary?.generatedAt
+              ? `generated ${session.aiSummary.generatedAt.toLocaleString()}`
+              : "not generated yet"}
+          </p>
+        </>
+      ) : (
+        <p className="mt-2 text-sm leading-6 text-zinc-700">
+          No imports have completed yet.
+        </p>
+      )}
+    </section>
+  );
+}
+
+type ImportStatusSession = {
+  aiSummary?: {
+    generatedAt?: Date | null;
+  } | null;
+  lastImportAt?: Date | null;
+  lastImportFailedScoreCount?: number | null;
+  lastImportScoreCount?: number | null;
+};
+
+function SmallStat({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="rounded-md border border-zinc-200 p-3">
+      <p className="text-xs font-medium uppercase tracking-wide text-zinc-500">
+        {label}
+      </p>
+      <p className="mt-1 text-lg font-semibold text-zinc-950">{value}</p>
+    </div>
   );
 }
 

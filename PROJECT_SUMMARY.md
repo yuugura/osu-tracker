@@ -58,6 +58,7 @@ osu! Session Tracker is a Next.js App Router app for logging in with osu!, impor
 
 - Added session list.
 - Added delete session button.
+- Added last import status panel with returned score count, failed count, and AI summary timestamp.
 - Added personal highlights with 24h, 7d, and all-imported timeframes:
   - play count
   - passed/failed counts
