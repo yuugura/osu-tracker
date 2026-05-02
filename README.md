@@ -112,6 +112,10 @@ For the osu! OAuth application, use this local callback URL:
 http://localhost:3000/api/auth/osu/callback
 ```
 
+Use `http://localhost:3000` locally rather than `http://127.0.0.1:3000`.
+The login route canonicalizes to `NEXT_PUBLIC_APP_URL` before setting the
+OAuth state cookie so the callback host matches the cookie host.
+
 For production, update these values:
 
 ```text
