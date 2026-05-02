@@ -80,8 +80,11 @@ const PADDING = {
 
 export function SessionStatsChart({ data }: { data: SessionChartPoint[] }) {
   const [metricKey, setMetricKey] = useState<Metric["key"]>("playCount");
+  const [activePointId, setActivePointId] = useState<string | null>(null);
   const metric = METRICS.find((item) => item.key === metricKey) ?? METRICS[0];
   const chart = useMemo(() => buildChart(data, metric), [data, metric]);
+  const activePoint =
+    chart.points.find((point) => point.id === activePointId) ?? null;
 
   return (
     <section className="border-b border-zinc-800 py-10">
@@ -155,10 +158,30 @@ export function SessionStatsChart({ data }: { data: SessionChartPoint[] }) {
               <g
                 aria-label={`${point.name}: ${metric.format(point.value)}`}
                 key={point.id}
+                onBlur={() => setActivePointId(null)}
+                onFocus={() => setActivePointId(point.id)}
+                onMouseEnter={() => setActivePointId(point.id)}
+                onMouseLeave={() => setActivePointId(null)}
+                tabIndex={0}
               >
-                <circle cx={point.x} cy={point.y} fill="#ec4899" r="4" />
+                <circle
+                  cx={point.x}
+                  cy={point.y}
+                  fill="#ec4899"
+                  r={activePointId === point.id ? "6" : "4"}
+                />
+                <circle
+                  cx={point.x}
+                  cy={point.y}
+                  fill="transparent"
+                  r="14"
+                  stroke="transparent"
+                />
               </g>
             ))}
+            {activePoint ? (
+              <ChartTooltip metric={metric} point={activePoint} />
+            ) : null}
             {chart.points.map((point, index) => {
               if (index !== 0 && index !== chart.points.length - 1) {
                 return null;
@@ -190,6 +213,68 @@ export function SessionStatsChart({ data }: { data: SessionChartPoint[] }) {
   );
 }
 
+function ChartTooltip({
+  metric,
+  point,
+}: {
+  metric: Metric;
+  point: ChartPoint;
+}) {
+  const tooltipWidth = 178;
+  const tooltipHeight = 58;
+  const tooltipX = Math.min(
+    Math.max(PADDING.left, point.x - tooltipWidth / 2),
+    CHART_WIDTH - PADDING.right - tooltipWidth,
+  );
+  const tooltipY =
+    point.y - tooltipHeight - 14 > PADDING.top
+      ? point.y - tooltipHeight - 14
+      : point.y + 14;
+
+  return (
+    <g pointerEvents="none">
+      <line
+        stroke="#831843"
+        strokeDasharray="4 4"
+        x1={point.x}
+        x2={point.x}
+        y1={PADDING.top}
+        y2={CHART_HEIGHT - PADDING.bottom}
+      />
+      <rect
+        fill="#18181b"
+        height={tooltipHeight}
+        rx="6"
+        stroke="#3f3f46"
+        width={tooltipWidth}
+        x={tooltipX}
+        y={tooltipY}
+      />
+      <text
+        fill="#fafafa"
+        fontSize="13"
+        fontWeight="600"
+        x={tooltipX + 12}
+        y={tooltipY + 22}
+      >
+        {metric.label}: {metric.format(point.value)}
+      </text>
+      <text fill="#a1a1aa" fontSize="12" x={tooltipX + 12} y={tooltipY + 42}>
+        {point.date}
+      </text>
+    </g>
+  );
+}
+
+type ChartPoint = {
+  date: string;
+  id: string;
+  name: string;
+  value: number;
+  x: number;
+  y: number;
+};
+
 function buildChart(data: SessionChartPoint[], metric: Metric) {
   const values = data.map((point) => Number(point[metric.key] ?? 0));
   const minValue = Math.min(...values, 0);
@@ -199,7 +284,7 @@ function buildChart(data: SessionChartPoint[], metric: Metric) {
   const innerHeight = CHART_HEIGHT - PADDING.top - PADDING.bottom;
   const xStep = data.length > 1 ? innerWidth / (data.length - 1) : 0;
 
-  const points = data.map((point, index) => {
+  const points: ChartPoint[] = data.map((point, index) => {
     const value = Number(point[metric.key] ?? 0);
     const x =
       data.length > 1
