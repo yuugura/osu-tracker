@@ -5,7 +5,7 @@ export const runtime = "nodejs";
 
 export async function POST() {
   const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
-  const response = NextResponse.redirect(new URL("/", appUrl));
+  const response = NextResponse.redirect(new URL("/", appUrl), { status: 303 });
 
   response.cookies.set(getSessionCookieName(), "", {
     ...sessionCookieOptions,
