@@ -19,7 +19,6 @@ import { getCurrentSession } from "@/lib/auth";
 import { connectMongoDB } from "@/lib/mongodb";
 import { getSessionStats } from "@/lib/sessionStats";
 import { PlayModel } from "@/models/Play";
-import { ImportRunModel } from "@/models/ImportRun";
 import { SessionModel } from "@/models/Session";
 
 export default async function DashboardPage() {
@@ -34,11 +33,6 @@ export default async function DashboardPage() {
   const sessions = await SessionModel.find({ userId: session.userId }).sort({
     createdAt: -1,
   });
-  const latestSchedulerRun = await ImportRunModel.findOne({
-    trigger: "scheduler",
-  })
-    .sort({ startedAt: -1 })
-    .lean();
   const sessionIds = sessions.map((osuSession) => osuSession._id);
   const plays = await PlayModel.find({
     sessionId: { $in: sessionIds },
@@ -141,7 +135,6 @@ export default async function DashboardPage() {
       <section className="grid gap-8 py-10 lg:grid-cols-[320px_1fr]">
         <div className="space-y-4">
           <ImportStatusPanel
-            schedulerRun={latestSchedulerRun}
             session={latestImportedSession}
           />
           <form
@@ -178,91 +171,29 @@ export default async function DashboardPage() {
 }
 
 function ImportStatusPanel({
-  schedulerRun,
   session,
 }: {
-  schedulerRun: ImportStatusRun | null | undefined;
   session: ImportStatusSession | null | undefined;
 }) {
   return (
     <section className="rounded-md border border-zinc-800 bg-zinc-900 p-5">
       <h2 className="text-lg font-semibold text-zinc-50">Import status</h2>
       {session?.lastImportAt ? (
-        <>
-          <p className="mt-2 text-sm leading-6 text-zinc-400">
-            Last imported {session.lastImportAt.toLocaleString()}.
-          </p>
-          <div className="mt-4 grid grid-cols-2 gap-3">
-            <SmallStat
-              label="Returned"
-              value={String(session.lastImportScoreCount ?? 0)}
-            />
-            <SmallStat
-              label="Failed"
-              value={String(session.lastImportFailedScoreCount ?? 0)}
-            />
-          </div>
-          <p className="mt-4 text-xs leading-5 text-zinc-500">
-            AI summary{" "}
-            {session.aiSummary?.generatedAt
-              ? `generated ${session.aiSummary.generatedAt.toLocaleString()}`
-              : "not generated yet"}
-          </p>
-        </>
+        <p className="mt-2 text-sm leading-6 text-zinc-400">
+          Last imported {session.lastImportAt.toLocaleString()}.
+        </p>
       ) : (
         <p className="mt-2 text-sm leading-6 text-zinc-400">
           No imports have completed yet.
         </p>
       )}
-      <div className="mt-5 border-t border-zinc-800 pt-4">
-        <p className="text-xs font-medium uppercase tracking-wide text-zinc-500">
-          Scheduler
-        </p>
-        {schedulerRun ? (
-          <p className="mt-2 text-sm leading-6 text-zinc-400">
-            Last run {schedulerRun.status} at{" "}
-            {schedulerRun.finishedAt?.toLocaleString() ??
-              schedulerRun.startedAt.toLocaleString()}
-            . {schedulerRun.successCount ?? 0} succeeded /{" "}
-            {schedulerRun.failureCount ?? 0} failed.
-          </p>
-        ) : (
-          <p className="mt-2 text-sm leading-6 text-zinc-400">
-            No scheduler runs recorded yet.
-          </p>
-        )}
-      </div>
     </section>
   );
 }
 
 type ImportStatusSession = {
-  aiSummary?: {
-    generatedAt?: Date | null;
-  } | null;
   lastImportAt?: Date | null;
-  lastImportFailedScoreCount?: number | null;
-  lastImportScoreCount?: number | null;
 };
-
-type ImportStatusRun = {
-  failureCount?: number | null;
-  finishedAt?: Date | null;
-  startedAt: Date;
-  status: string;
-  successCount?: number | null;
-};
-
-function SmallStat({ label, value }: { label: string; value: string }) {
-  return (
-    <div className="rounded-md border border-zinc-800 bg-zinc-950/40 p-3">
-      <p className="text-xs font-medium uppercase tracking-wide text-zinc-500">
-        {label}
-      </p>
-      <p className="mt-1 text-lg font-semibold text-zinc-50">{value}</p>
-    </div>
-  );
-}
 
 type DashboardPlayWithSession = DashboardHighlightPlay & {
   passed: boolean | null;

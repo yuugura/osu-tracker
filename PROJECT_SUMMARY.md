@@ -63,7 +63,7 @@ osu! Session Tracker is a Next.js App Router app for logging in with osu!, impor
 - Uses the app-wide dark mode visual treatment.
 - Added session list.
 - Added delete session button.
-- Added last import status panel with returned score count, failed count, AI summary timestamp, and scheduler run status.
+- Added a last import status panel.
 - Added personal highlights with 24h, 7d, and all-imported timeframes:
   - play count
   - passed/failed counts
@@ -83,6 +83,7 @@ osu! Session Tracker is a Next.js App Router app for logging in with osu!, impor
 ### Community
 
 - Added `/community` as a separate navigation tab from the personal dashboard.
+- `/community` is public so visitors without an osu! account can view app-user highlights from the landing page.
 - Uses the shared authenticated app shell with consistent page header styling.
 - Uses the app-wide dark mode visual treatment.
 - Added trending map leaderboards for the last 24 hours and last 7 days:
@@ -99,6 +100,7 @@ osu! Session Tracker is a Next.js App Router app for logging in with osu!, impor
   - highest PP plays across all imported data
 - Leaderboards show osu! usernames and link out to osu! profiles.
 - Community rankings are based only on users and plays in this app database, not global osu! data.
+- Community highlights are public; logged-out community navigation sends login/personal-dashboard intent straight to osu! OAuth while Dashboard and Session detail pages remain login-protected.
 
 ### Session Detail
 
@@ -126,6 +128,13 @@ osu! Session Tracker is a Next.js App Router app for logging in with osu!, impor
 - AI summaries are generated automatically after recent-play imports from imported play metadata and session stats, then stored on the `Session` document.
 - Gemini summary generation disables thinking with `thinkingBudget: 0` to avoid very short truncated summaries on simple recap prompts.
 
+### Settings
+
+- Added `/settings` as a protected app-shell page.
+- Added an account-level toggle for AI-generated session summaries.
+- Stored the toggle on the `User` model as `aiSummariesEnabled`, defaulting to enabled.
+- Manual, dashboard-auto, and scheduled imports all respect this setting through shared import logic.
+
 ## Important Decisions
 
 - No NextAuth, Firebase, Prisma, or Supabase.
@@ -138,6 +147,7 @@ osu! Session Tracker is a Next.js App Router app for logging in with osu!, impor
 - MongoDB Atlas Network Access needs to allow Vercel serverless connections; `0.0.0.0/0` works when fixed outbound IPs are not available.
 - AI summaries are generated after imports rather than manually regenerated from session pages.
 - AI generation is best-effort so osu! play imports are not blocked by Gemini failures or missing API keys.
+- AI summary generation can be disabled per user for future imports.
 - Gemini is the current AI provider because it has a practical free tier for small development usage.
 - Community leaderboards are not opt-in right now; any user with imported plays can appear in app-user rankings.
 - Dashboard, Community, and Session detail pages share `src/components/AppShell.tsx` so authenticated routes feel like one app.

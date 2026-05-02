@@ -5,6 +5,7 @@ A Next.js app for tracking osu! play sessions. Log in with osu!, import recent p
 ## Features
 
 - osu! OAuth login
+- Public Community highlights page for visitors without an osu! login
 - MongoDB-backed user/session/play storage
 - Automatic recent-play imports on dashboard load
 - Manual import button for the current 24-hour session
@@ -18,14 +19,15 @@ A Next.js app for tracking osu! play sessions. Log in with osu!, import recent p
   - searchable play list
 - Dashboard with:
   - shared app shell navigation with Community and logout controls
-  - last import status panel with returned score count, failed count, AI summary timestamp, and scheduler run status
+  - last import status panel
   - personal highlights for play count, top PP plays, best accuracy plays, and maps to retry across 24h, 7d, and all imported plays
   - session search across contained plays
   - selectable trend line chart for play count, playtime, score, PP, accuracy, passed, and failed counts
   - delete session action
-- Community page with trending maps and app-user leaderboards for play volume and top imported PP plays
+- Public Community page with trending maps and app-user leaderboards for play volume and top imported PP plays
 - Dashboard, Community, and Session detail pages share one authenticated app shell/navigation
 - Dark mode UI across the landing page and authenticated app pages
+- Settings page with a per-user toggle for AI-generated session summaries
 
 ## Tech Stack
 
@@ -47,6 +49,7 @@ src/
       sessions/
     community/
     dashboard/
+    settings/
     sessions/[id]/
   components/
     AppShell.tsx
@@ -83,6 +86,9 @@ token budget on hidden reasoning and return a truncated visible summary.
 AI summary generation is best-effort: if Gemini is unavailable or
 `GEMINI_API_KEY` is not configured, the play import still succeeds and the
 session keeps its previous summary, if any.
+
+Logged-in users can disable future AI summary generation from `/settings`.
+Manual, dashboard-auto, and scheduled imports all respect the per-user setting.
 
 ## Environment Variables
 
@@ -184,12 +190,14 @@ NEXT_PUBLIC_APP_URL=https://your-app.vercel.app
 - AI session summaries use the Gemini API and require `GEMINI_API_KEY`.
 - `GEMINI_SUMMARY_MODEL` defaults to `gemini-2.5-flash` when omitted.
 - Community leaderboards rank users from imported app data only, not all osu! players globally.
+- Community highlights are public; logged-out community navigation sends personal-dashboard intent straight to osu! login.
 - Current automation imports when the dashboard is opened and throttles imports in the browser.
 - Vercel Cron handles production automatic importing through `/api/cron/import-recent`.
 - The protected automatic import endpoint refreshes osu! tokens before importing when needed.
 - Import runs are recorded in MongoDB for manual, dashboard-auto, and scheduler imports.
 - Authenticated app pages use `src/components/AppShell.tsx` for shared navigation, page headers, and logout.
 - The UI currently defaults to dark mode with zinc surfaces and pink accents.
+- Users can turn AI session summaries on or off from `/settings`; the setting defaults to enabled.
 
 ## Roadmap
 

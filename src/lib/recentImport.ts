@@ -32,7 +32,7 @@ export async function importRecentPlaysForUser({
   osuUserId,
   userId,
 }: ImportUserInput) {
-  const accessToken = await getValidAccessToken(userId);
+  const { accessToken, aiSummariesEnabled } = await getImportUserSettings(userId);
   const [profile, recentScores] = await Promise.all([
     fetchOsuMe(accessToken),
     fetchRecentOsuScores(accessToken, osuUserId),
@@ -110,7 +110,7 @@ export async function importRecentPlaysForUser({
     .sort({ playedAt: -1 })
     .lean();
 
-  if (sessionPlays.length > 0) {
+  if (aiSummariesEnabled && sessionPlays.length > 0) {
     try {
       const summary = await generateAiSessionSummary(sessionPlays);
 
@@ -192,9 +192,9 @@ export function summarizeImportResults(
   };
 }
 
-async function getValidAccessToken(userId: string) {
+async function getImportUserSettings(userId: string) {
   const user = await UserModel.findById(userId).select(
-    "accessToken refreshToken tokenExpiresAt",
+    "accessToken refreshToken tokenExpiresAt aiSummariesEnabled",
   );
 
   if (!user?.accessToken) {
@@ -204,7 +204,10 @@ async function getValidAccessToken(userId: string) {
   const tokenExpiresAt = user.tokenExpiresAt?.getTime() ?? 0;
 
   if (tokenExpiresAt > Date.now() + TOKEN_REFRESH_BUFFER_MS) {
-    return user.accessToken;
+    return {
+      accessToken: user.accessToken,
+      aiSummariesEnabled: user.aiSummariesEnabled !== false,
+    };
   }
 
   if (!user.refreshToken) {
@@ -218,7 +221,10 @@ async function getValidAccessToken(userId: string) {
   user.tokenExpiresAt = new Date(Date.now() + token.expires_in * 1000);
   await user.save();
 
-  return user.accessToken;
+  return {
+    accessToken: user.accessToken,
+    aiSummariesEnabled: user.aiSummariesEnabled !== false,
+  };
 }
 
 function isFailedScore(score: { rank: string; passed?: boolean }) {

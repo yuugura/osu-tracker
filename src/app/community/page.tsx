@@ -1,4 +1,3 @@
-import { redirect } from "next/navigation";
 import { AppShell } from "@/components/AppShell";
 import { getCurrentSession } from "@/lib/auth";
 import { connectMongoDB } from "@/lib/mongodb";
@@ -43,10 +42,6 @@ type TrendingMap = {
 export default async function CommunityPage() {
   const session = await getCurrentSession();
 
-  if (!session) {
-    redirect("/");
-  }
-
   await connectMongoDB();
 
   const [
@@ -72,6 +67,7 @@ export default async function CommunityPage() {
       activeSection="community"
       description="Rankings are based on plays imported by users of this app, not global osu! data."
       eyebrow="Community"
+      isAuthenticated={Boolean(session)}
       title="App user leaderboards"
     >
       <section className="border-b border-zinc-800 py-10">

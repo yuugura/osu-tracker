@@ -1,10 +1,11 @@
 import Link from "next/link";
 import type { ReactNode } from "react";
 
-type AppSection = "dashboard" | "community" | "session";
+type AppSection = "dashboard" | "community" | "session" | "settings";
 
 type AppShellProps = {
   activeSection: AppSection;
+  isAuthenticated?: boolean;
   backHref?: string;
   backLabel?: string;
   children: ReactNode;
@@ -14,13 +15,19 @@ type AppShellProps = {
   title: string;
 };
 
-const navItems: { href: string; label: string; section: AppSection }[] = [
+const authenticatedNavItems: { href: string; label: string; section: AppSection }[] = [
   { href: "/dashboard", label: "Dashboard", section: "dashboard" },
+  { href: "/community", label: "Community", section: "community" },
+  { href: "/settings", label: "Settings", section: "settings" },
+];
+
+const publicNavItems: { href: string; label: string; section: AppSection }[] = [
   { href: "/community", label: "Community", section: "community" },
 ];
 
 export function AppShell({
   activeSection,
+  isAuthenticated = true,
   backHref,
   backLabel,
   children,
@@ -29,13 +36,15 @@ export function AppShell({
   headerMeta,
   title,
 }: AppShellProps) {
+  const navItems = isAuthenticated ? authenticatedNavItems : publicNavItems;
+
   return (
     <div className="min-h-screen bg-zinc-950 text-zinc-50">
       <header className="sticky top-0 z-20 border-b border-zinc-800 bg-zinc-950/90 backdrop-blur">
         <div className="mx-auto flex w-full max-w-6xl flex-col gap-4 px-6 py-4 sm:flex-row sm:items-center sm:justify-between">
           <Link
             className="text-sm font-bold tracking-tight text-zinc-50"
-            href="/dashboard"
+            href={isAuthenticated ? "/dashboard" : "/community"}
           >
             osu! Session Tracker
           </Link>
@@ -56,11 +65,20 @@ export function AppShell({
                 </Link>
               ))}
             </nav>
-            <form action="/api/auth/logout" method="post">
-              <button className="rounded-md border border-zinc-700 bg-zinc-900 px-3 py-2 text-sm font-medium text-zinc-100 hover:bg-zinc-800">
-                Log out
-              </button>
-            </form>
+            {isAuthenticated ? (
+              <form action="/api/auth/logout" method="post">
+                <button className="rounded-md border border-zinc-700 bg-zinc-900 px-3 py-2 text-sm font-medium text-zinc-100 hover:bg-zinc-800">
+                  Log out
+                </button>
+              </form>
+            ) : (
+              <a
+                className="rounded-md bg-pink-500 px-3 py-2 text-sm font-semibold text-white hover:bg-pink-400"
+                href="/api/auth/osu/login"
+              >
+                Log in with osu!
+              </a>
+            )}
           </div>
         </div>
       </header>

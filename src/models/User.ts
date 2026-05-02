@@ -25,6 +25,10 @@ const userSchema = new Schema(
     tokenExpiresAt: {
       type: Date,
     },
+    aiSummariesEnabled: {
+      type: Boolean,
+      default: true,
+    },
   },
   {
     timestamps: true,

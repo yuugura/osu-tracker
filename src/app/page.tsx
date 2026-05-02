@@ -12,12 +12,18 @@ export default function Home() {
           Log in with osu!, import recent plays, and build a personal history of
           sessions, scores, accuracy, ranks, and map choices over time.
         </p>
-        <div className="mt-8">
+        <div className="mt-8 flex flex-wrap gap-3">
           <a
             className="inline-flex rounded-md bg-pink-500 px-4 py-2.5 text-sm font-semibold text-white hover:bg-pink-400"
             href="/api/auth/osu/login"
           >
             Log in with osu!
+          </a>
+          <a
+            className="inline-flex rounded-md border border-zinc-700 px-4 py-2.5 text-sm font-semibold text-zinc-100 hover:bg-zinc-900"
+            href="/community"
+          >
+            View community highlights
           </a>
         </div>
       </div>

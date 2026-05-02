@@ -27,11 +27,13 @@
 - This project uses `src/app`, not root `app`.
 - Next.js version is new enough that local docs in `node_modules/next/dist/docs/` should be checked when touching framework-specific APIs.
 - Auth uses osu! OAuth, then a signed HTTP-only app session cookie using `SESSION_SECRET`.
+- Community highlights are public; Dashboard and Session detail pages require osu! login.
 - MongoDB models live in `src/models`.
 - Shared server helpers live in `src/lib`.
 - UI components live in `src/components`.
 - Authenticated Dashboard, Community, and Session pages share `src/components/AppShell.tsx` for navigation, page headers, and logout.
 - The UI currently defaults to dark mode with zinc surfaces and pink accents.
+- User settings live on the `User` model; `aiSummariesEnabled` defaults to true and controls future AI summary generation in shared import logic.
 - AI session summary generation lives in `src/lib/aiSessionSummary.ts` and runs automatically from `src/app/api/sessions/import-recent/route.ts` after imports.
 - Shared import logic lives in `src/lib/recentImport.ts`; manual and automatic imports should use it.
 - Vercel Cron calls `src/app/api/cron/import-recent/route.ts`; keep it protected by `CRON_SECRET`.
@@ -47,3 +49,5 @@
 - Session pages should prioritize useful play review: stats, ranks, failed plays, score links, AI summaries, and search.
 - Dashboard pages should prioritize personal highlights, trends, and finding sessions by play metadata.
 - Community pages should clearly label leaderboards as app-user/imported-data rankings rather than global osu! rankings.
+- Public community access should not expose osu! tokens, session cookies, or private per-user controls.
+- Logged-out community navigation should send login/personal dashboard intent directly to `/api/auth/osu/login`, not through the landing page.
