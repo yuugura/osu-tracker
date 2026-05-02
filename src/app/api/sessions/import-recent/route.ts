@@ -66,8 +66,10 @@ export async function POST(request: NextRequest) {
   }
 
   if (isFormRequest(request)) {
+    const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? request.url;
+
     return NextResponse.redirect(
-      new URL(`/sessions/${result.sessionId}`, request.url),
+      new URL(`/sessions/${result.sessionId}`, appUrl),
       { status: 303 },
     );
   }

@@ -178,6 +178,7 @@ CRON_SECRET=
 - Browser-throttled auto import is not a replacement for Vercel Cron in production.
 - If production OAuth redirects to `invalid_oauth_state`, check that `NEXT_PUBLIC_APP_URL`, `OSU_REDIRECT_URI`, and the osu! OAuth callback all use the same stable Vercel domain.
 - Local OAuth should use `localhost`; the login route canonicalizes to `NEXT_PUBLIC_APP_URL` before setting state to avoid `localhost` and `127.0.0.1` cookie mismatches.
+- Manual import form redirects use `NEXT_PUBLIC_APP_URL` so local dev redirects do not point browsers at `0.0.0.0`.
 - If production OAuth redirects to `oauth_callback_failed` with a MongoDB server selection error, check Atlas Network Access.
 - AI summaries require a Gemini API key and run after recent-play imports.
 - Gemini free-tier requests may be used by Google to improve products; keep summary prompts limited to non-secret play/session metadata.

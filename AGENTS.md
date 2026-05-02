@@ -39,6 +39,7 @@
 - Vercel Cron calls `src/app/api/cron/import-recent/route.ts`; keep it protected by `CRON_SECRET`.
 - Vercel production OAuth should use the stable production domain in `NEXT_PUBLIC_APP_URL`, `OSU_REDIRECT_URI`, and the osu! OAuth callback.
 - The osu! login route canonicalizes to `NEXT_PUBLIC_APP_URL` before setting OAuth state; keep local OAuth URLs on `localhost`, not mixed with `127.0.0.1`.
+- Server-side redirects that need an absolute app URL should use `NEXT_PUBLIC_APP_URL` so local dev does not redirect users to `0.0.0.0`.
 - MongoDB Atlas Network Access must allow Vercel serverless connections.
 - Gemini summaries use `GEMINI_API_KEY` and `GEMINI_SUMMARY_MODEL`; do not send tokens, cookies, or secrets to the model.
 - AI summary generation should be best-effort: imports must still succeed if Gemini is unavailable or unconfigured.
