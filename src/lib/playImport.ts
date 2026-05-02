@@ -35,11 +35,9 @@ export function mapRecentScoreToPlay({
 }
 
 export function getDefaultSessionName(date = new Date()) {
-  const formattedDate = new Intl.DateTimeFormat("en-US", {
+  return new Intl.DateTimeFormat("en-US", {
     dateStyle: "medium",
   }).format(date);
-
-  return `Recent plays - ${formattedDate}`;
 }
 
 export function getRecentSessionCutoff(date = new Date()) {
