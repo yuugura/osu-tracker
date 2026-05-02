@@ -1,33 +1,17 @@
 # osu! Session Tracker
 
-A Next.js app for tracking osu! play sessions. Log in with osu!, import recent plays, and review session history with play lists, stats, search, and trend charts.
+A Next.js app for importing recent osu! plays into rolling 24-hour sessions, then reviewing performance with session stats, searchable play history, community highlights, and optional AI summaries.
 
 ## Features
 
-- osu! OAuth login
-- Public Community highlights page for visitors without an osu! login
-- MongoDB-backed user/session/play storage
-- Automatic recent-play imports on dashboard load
-- Manual import button for the current 24-hour session
-- Failed play import support when osu! returns failed scores
-- Session detail pages with:
-  - imported plays
-  - rank, accuracy, score, PP, and score-page links
-  - session summary stats
-  - Gemini AI session summaries generated after imports
-  - rank breakdown
-  - searchable play list
-- Dashboard with:
-  - shared app shell navigation with Community and logout controls
-  - last import status panel
-  - personal highlights for play count, top PP plays, best accuracy plays, and maps to retry across 24h, 7d, and all imported plays
-  - session search across contained plays
-  - selectable trend line chart for play count, playtime, score, PP, accuracy, passed, and failed counts
-  - delete session action
-- Public Community page with trending maps and app-user leaderboards for play volume and top imported PP plays
-- Dashboard, Community, and Session detail pages share one authenticated app shell/navigation
-- Dark mode UI across the landing page and authenticated app pages
-- Settings page with a per-user toggle for AI-generated session summaries
+- Sign in with osu! OAuth.
+- Import recent plays manually, on dashboard load, or through Vercel Cron.
+- Group imported scores into rolling 24-hour sessions.
+- Review each session with play stats, rank breakdowns, failed plays, score links, and search.
+- Browse personal dashboard highlights, trends, and session history.
+- View public community highlights based on app-imported data.
+- Generate best-effort Gemini session summaries after imports.
+- Toggle AI summaries per user from settings.
 
 ## Tech Stack
 
@@ -38,61 +22,23 @@ A Next.js app for tracking osu! play sessions. Log in with osu!, import recent p
 - MongoDB Atlas
 - Mongoose
 - osu! API v2 OAuth
+- Gemini API for optional AI summaries
 
-## Project Structure
+## Getting Started
 
-```text
-src/
-  app/
-    api/
-      auth/
-      sessions/
-    community/
-    dashboard/
-    settings/
-    sessions/[id]/
-  components/
-    AppShell.tsx
-  lib/
-  models/
-  types/
+Install dependencies:
+
+```bash
+npm install
 ```
 
-## AI Session Summaries
+Copy the example environment file:
 
-Session pages include a read-only **AI session summary** panel. Summaries are
-generated automatically after each successful recent-play import, including the
-dashboard auto import and the manual `Import now` action.
-
-```text
-POST /api/sessions/import-recent
+```bash
+cp .env.example .env.local
 ```
 
-The import route saves any new plays, loads the full current session, generates
-a concise review with Gemini, and stores the result on the session as:
-
-```text
-aiSummary.text
-aiSummary.model
-aiSummary.generatedAt
-```
-
-The prompt is built from imported play metadata and aggregate stats only. It
-does not send osu! OAuth tokens, app session cookies, MongoDB credentials, or
-other secrets. The Gemini request sets `thinkingBudget: 0` because this is a
-short summarization task; without that, Gemini 2.5 Flash can spend the small
-token budget on hidden reasoning and return a truncated visible summary.
-
-AI summary generation is best-effort: if Gemini is unavailable or
-`GEMINI_API_KEY` is not configured, the play import still succeeds and the
-session keeps its previous summary, if any.
-
-Logged-in users can disable future AI summary generation from `/settings`.
-Manual, dashboard-auto, and scheduled imports all respect the per-user setting.
-
-## Environment Variables
-
-Create `.env.local` in the project root.
+Fill in the required values in `.env.local`:
 
 ```text
 MONGODB_URI=
@@ -106,51 +52,64 @@ GEMINI_SUMMARY_MODEL=gemini-2.5-flash
 CRON_SECRET=
 ```
 
-For the osu! OAuth application, use this local callback URL:
+For local osu! OAuth development, register this callback URL in your osu! OAuth app:
 
 ```text
 http://localhost:3000/api/auth/osu/callback
 ```
 
-Use `http://localhost:3000` locally rather than `http://127.0.0.1:3000`.
-The login route canonicalizes to `NEXT_PUBLIC_APP_URL` before setting the
-OAuth state cookie so the callback host matches the cookie host.
-
-For production, update these values:
-
-```text
-OSU_REDIRECT_URI=https://your-app.vercel.app/api/auth/osu/callback
-NEXT_PUBLIC_APP_URL=https://your-app.vercel.app
-```
-
-## Development
-
-Install dependencies:
-
-```bash
-npm install
-```
-
-Run the dev server:
+Run the development server:
 
 ```bash
 npm run dev
 ```
 
-Open:
+Open [http://localhost:3000](http://localhost:3000).
 
-```text
-http://localhost:3000
-```
-
-Validate:
+## Scripts
 
 ```bash
+npm run dev
 npm run lint
 npm run build
+npm run start
 ```
 
-## Scheduled Imports
+## Project Structure
+
+```text
+src/
+  app/
+    api/            REST API routes, auth, imports, and cron
+    community/      public community highlights
+    dashboard/      authenticated personal dashboard
+    settings/       authenticated user settings
+    sessions/[id]/  authenticated session detail pages
+  components/       shared UI components
+  lib/              server helpers and import logic
+  models/           Mongoose models
+  types/            shared TypeScript types
+```
+
+## Deployment
+
+The app is designed to deploy on Vercel with MongoDB Atlas.
+
+Set production environment variables in Vercel, including:
+
+```text
+OSU_REDIRECT_URI=https://your-app.vercel.app/api/auth/osu/callback
+NEXT_PUBLIC_APP_URL=https://your-app.vercel.app
+MONGODB_URI=
+OSU_CLIENT_ID=
+OSU_CLIENT_SECRET=
+SESSION_SECRET=
+CRON_SECRET=
+GEMINI_API_KEY=
+GEMINI_SUMMARY_MODEL=gemini-2.5-flash
+```
+
+Use your stable production domain for the osu! OAuth callback. Avoid one-off deployment preview URLs for production OAuth.
 
 Vercel Cron is configured in `vercel.json` to call:
 
@@ -158,54 +117,15 @@ Vercel Cron is configured in `vercel.json` to call:
 GET /api/cron/import-recent
 ```
 
-The route uses `CRON_SECRET` for authorization. Set `CRON_SECRET` in Vercel
-project environment variables before enabling the cron job. The route imports
-recent plays for all stored users, refreshes osu! tokens when needed, records an
-`ImportRun`, and generates session summaries best-effort.
+The cron endpoint is protected by `CRON_SECRET`, so set that variable before enabling scheduled imports.
 
-## Vercel Deployment Notes
-
-- Use the stable Vercel production domain for OAuth, not a one-off deployment URL.
-- In the osu! OAuth app, keep the local callback and add the production callback:
-
-```text
-http://localhost:3000/api/auth/osu/callback
-https://your-app.vercel.app/api/auth/osu/callback
-```
-
-- In Vercel production environment variables, set:
-
-```text
-OSU_REDIRECT_URI=https://your-app.vercel.app/api/auth/osu/callback
-NEXT_PUBLIC_APP_URL=https://your-app.vercel.app
-```
-
-- MongoDB Atlas must allow Vercel serverless functions to connect. If you do
-  not have fixed outbound IPs, add `0.0.0.0/0` in Atlas Network Access and use a
-  strong database user password.
-- Check production errors in Vercel under Project -> Logs or Deployment ->
-  Runtime Logs.
+MongoDB Atlas must allow Vercel serverless connections. If you do not have fixed outbound IPs, configure Atlas Network Access accordingly and use a strong database password.
 
 ## Notes
 
-- `.env.local` contains secrets and must not be committed.
-- `.env.example` documents required variables only.
-- The app stores osu! access and refresh tokens in MongoDB for the logged-in user.
-- AI session summaries use the Gemini API and require `GEMINI_API_KEY`.
-- `GEMINI_SUMMARY_MODEL` defaults to `gemini-2.5-flash` when omitted.
-- Community leaderboards rank users from imported app data only, not all osu! players globally.
-- Community highlights are public; logged-out community navigation sends personal-dashboard intent straight to osu! login.
-- Current automation imports when the dashboard is opened and throttles imports in the browser.
-- Vercel Cron handles production automatic importing through `/api/cron/import-recent`.
-- The protected automatic import endpoint refreshes osu! tokens before importing when needed.
-- Import runs are recorded in MongoDB for manual, dashboard-auto, and scheduler imports.
-- Authenticated app pages use `src/components/AppShell.tsx` for shared navigation, page headers, and logout.
-- The UI currently defaults to dark mode with zinc surfaces and pink accents.
-- Users can turn AI session summaries on or off from `/settings`; the setting defaults to enabled.
-
-## Roadmap
-
-- Improve score-page links for failed plays where osu! exposes a reliable URL
-- Add richer filters for session plays
-- Add charts for more session stats
-- Polish Vercel deployment and production environment defaults
+- `.env.local` contains secrets and should never be committed.
+- `.env.example` documents variable names only.
+- Community rankings are based on this app's imported data, not global osu! rankings.
+- AI summaries are best-effort; imports still succeed if Gemini is unavailable or unconfigured.
+- More detailed project context lives in `PROJECT_SUMMARY.md`.
+- The previous detailed README has been preserved as `PROJECT_INSTRUCTIONS.md`.
